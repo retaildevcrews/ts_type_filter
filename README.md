@@ -1,14 +1,14 @@
 # Simple Python Inverted Index
 
 This is an example of a simple inverted index, written in Python.
-It includes a demo based on 154 Shakespeare sonnets.
+It includes a demo based on [154 Shakespeare sonnets](https://en.wikipedia.org/wiki/Shakespeare%27s_sonnets) obtained from [Project Gutenberg](https://www.gutenberg.org/ebooks/1041).
 
 ## Building
 
 1. Verify you have python version >=3.12. Note that 3.13 may not be supported yet.
-1. `pip install poetry` outside of any virtual environment
-2. `git clone TODO`
-3. `cd TODO`
+1. `pip install poetry` outside of any virtual environment.
+2. `git clone https://github.com/MikeHopcroft/python-index.git`
+3. `cd python-index`
 4. `python -m venv .venv`
 5. `.venv\Scripts\activate`
 6. `poetry install`
@@ -78,7 +78,7 @@ To thy fair flower add the rank smell of weeds:
 Total of 3 results found.
 ~~~
 
-Here's a query that matches documents with `"thrall"` or `"quench"`:
+Here's a query that matches documents with `"thrall"` or `"quench"`. Note that you must wrap the query in quotes so that the shell puts all of the words into the first command-line parameter.
 
 ~~~
 query "thrall quench"
