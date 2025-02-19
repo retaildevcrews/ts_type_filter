@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "python-index"
+version = "0.1.0"
+description = ""
+authors = ["Michael Hopcroft <mhop@microsoft.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+nltk = "^3.9.1"
+rich = "^13.9.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
