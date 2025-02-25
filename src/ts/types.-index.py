@@ -1,19 +1,22 @@
 from abc import ABC, abstractmethod
 import json
 
+
 class Indexer:
     def __init__(self):
         self._nodes = set()
         pass
 
     def add(self, node, terms):
-        if "Ham" in terms:
+        if "Turkey" in terms:
             self._nodes.add(node)
         if "lettuce" in terms:
             self._nodes.add(node)
-        print(node.format())
-        print(f"  {terms}")
-
+        if "Apple" in terms:
+            self._nodes.add(node)
+    
+        # print(node.format())
+        # print(f"  {terms}")
 
     def nodes(self, terms):
         return self._nodes
@@ -23,18 +26,44 @@ class Indexer:
         #         nodes.add(self.nodes[term])
         # return [node]
 
+
 class Graph:
     def __init__(self):
-      self.nodes = {}
+        self.nodes = {}
 
     def add(self, key, type):
-      if key in self.nodes:
-        raise ValueError(f"Key {key} already exists in the graph.")
-      self.nodes[key] = type
+        if key in self.nodes:
+            raise ValueError(f"Key {key} already exists in the graph.")
+        self.nodes[key] = type
+
+    def get(self, key):
+        value = self.nodes.get(key)
+        if value is None:
+            raise KeyError(f"Key {key} not found in the graph.")
+        return value
 
     def print(self):
-      for key, type in self.nodes.items():
-        print(f"{key}: {type.format()}")
+        for key, type in self.nodes.items():
+            print(f"{key}: {type.format()}")
+
+
+class GraphFilter:
+    def __init__(self, graph, nodes):
+        self._graph = graph
+        self._nodes = nodes
+        self._filtered = {}
+
+    def original(self, key):
+        return self._graph.get(key)
+
+    def filtered(self, key):
+        return self._filtered.get(key)
+
+    def add(self, key, type):
+        if key in self._filtered:
+            raise ValueError(f"Key {key} already exists in the graph.")
+        self._filtered[key] = type
+
 
 def build_graph(nodes):
     graph = Graph()
@@ -42,6 +71,7 @@ def build_graph(nodes):
         if isinstance(node, Define):
             graph.add(node.name, node)
     return graph
+
 
 class Node(ABC):
     next_id = 0
@@ -61,6 +91,7 @@ class Node(ABC):
     @abstractmethod
     def filter(self, nodes):
         pass
+
 
 class Define(Node):
     def __init__(self, name, params, type):
@@ -86,6 +117,7 @@ class Define(Node):
         t = self.type.filter(nodes)
         return Define(self.name, self.params, t)
 
+
 class Never(Node):
     def __init__(self):
         pass
@@ -98,6 +130,7 @@ class Never(Node):
 
     def filter(self, nodes):
         return self
+
 
 class Param(Node):
     def __init__(self, name, extends=None):
@@ -114,7 +147,7 @@ class Param(Node):
     # TODO: do we filter extends logic?
     def filter(self, nodes):
         return self
-    
+
 
 class Union(Node):
     def __init__(self, *types):
@@ -144,13 +177,13 @@ class Literal(Node):
         return json.dumps(self.text)
 
     def index(self, graph, indexer):
-      indexer.add(self, self.text)
-      if self.aliases:
-        for alias in self.aliases:
-            indexer(self, alias)
+        indexer.add(self, self.text)
+        if self.aliases:
+            for alias in self.aliases:
+                indexer(self, alias)
 
-    def filter(self, nodes):
-        return self if self in nodes else Never()
+    def filter(self, graphFilter):
+        return self if self in graphFilter._nodes else Never()
 
 
 class Struct(Node):
@@ -166,7 +199,7 @@ class Struct(Node):
 
     def filter(self, nodes):
         obj = {k: v.filter(nodes) for k, v in self.obj.items()}
-        filtered = { k: v for k, v in obj.items() if not isinstance(v, Never) }
+        filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
         return Struct(filtered) if len(filtered) > 0 else Never()
 
 
@@ -184,6 +217,13 @@ class Type(Node):
         pass
 
     def filter(self, nodes):
+        filtered = nodes.filtered(self.name)
+        if not filtered:
+            type = nodes.original(self.name)
+            filtered = type.filter(nodes)
+            nodes.add(self.name, filtered)
+        if isinstance(filtered, Define) and isinstance(filtered.type, Never):
+            return Never()
         return self
 
 
@@ -195,7 +235,7 @@ class Array(Node):
         return self.type.format() + "[]"
 
     def index(self, graph, indexer):
-         self.type.index(graph, indexer)
+        self.type.index(graph, indexer)
 
     def filter(self, nodes):
         t = self.type.filter(nodes)
@@ -252,14 +292,22 @@ def go():
     g.print()
 
     indexer = Indexer()
-    
+
     for x in root:
         x.index(g, indexer)
 
     print([x.format() for x in indexer.nodes("dummy")])
 
-    filtered = [n.filter(indexer.nodes("dummy")) for n in root]
-    for n in filtered:
+    nodes = indexer.nodes("dummy")
+    gf = GraphFilter(g, nodes)
+    filtered = [n.filter(gf) for n in root]
+    filtered2 = [
+        n for n in filtered if not (isinstance(n, Define) and isinstance(n.type, Never))
+    ]
+    # filtered = [root[-3].filter(gf)]
+    print('-----------------------')
+    for n in filtered2:
         print(n.format())
+
 
 go()
