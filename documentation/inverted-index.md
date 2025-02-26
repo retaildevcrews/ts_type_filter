@@ -81,7 +81,7 @@ Total of 3 results found.
 Here's a query that matches documents with `"thrall"` or `"quench"`. Note that you must wrap the query in quotes so that the shell puts all of the words into the first command-line parameter.
 
 ~~~
-query "thrall quench"
+% query "thrall quench"
 Search results for 'thrall quench':
 Found 2 results:
 

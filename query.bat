@@ -1,2 +1,2 @@
 @echo off
-python ts_type_filter\query.py %*
+python samples\inverted_index\query.py %*

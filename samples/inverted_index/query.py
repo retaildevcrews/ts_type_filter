@@ -1,6 +1,10 @@
 from rich import print
+import os
 import sys
-from inverted_index import Index
+
+# Add the parent directory to the sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from ts_type_filter import Index
 import sonnets
 
 def go(query):

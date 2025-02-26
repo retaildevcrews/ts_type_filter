@@ -1,11 +1,16 @@
+import os
 from rich import print
 import sys
-import inverted
+
+# Add the parent directory to the sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from ts_type_filter import Index
+
 import sonnets
 
 def go():
   # Create an index
-  index = inverted.Index()
+  index = Index()
 
   # Add sonnets to the index
   for sonnet in sonnets.sonnets:

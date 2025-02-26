@@ -1,2 +1,2 @@
 @echo off
-python ts_type_filter\stats.py
+python samples\inverted_index\stats.py
