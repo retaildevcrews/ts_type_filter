@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ts-type-filter"
+name = "ts_type_filter"
 version = "0.1.0"
 description = "Experimental library to assist in preparing Typescript type definitions for use in Large Language Model (LLM) prompts."
 authors = ["Michael Hopcroft <mhop@microsoft.com>"]

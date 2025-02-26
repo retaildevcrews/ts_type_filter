@@ -1,14 +1,14 @@
 # Inverted Index
 
-`ts-type-filter` uses a simple inverted index, written in Python.
+`ts_type_filter` uses a simple inverted index, written in Python.
 It includes a demo based on [154 Shakespeare sonnets](https://en.wikipedia.org/wiki/Shakespeare%27s_sonnets) obtained from [Project Gutenberg](https://www.gutenberg.org/ebooks/1041).
 
 ## Building
 
 1. Verify you have python version >=3.12. Note that 3.13 may not be supported yet.
 1. `pip install poetry` outside of any virtual environment.
-2. `git clone https://github.com/MikeHopcroft/ts-type-filter.git`
-3. `cd ts-type-filter`
+2. `git clone https://github.com/MikeHopcroft/ts_type_filter.git`
+3. `cd ts_type_filter`
 4. `python -m venv .venv`
 5. `.venv\Scripts\activate`
 6. `poetry install --no-root`

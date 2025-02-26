@@ -1,2 +1,2 @@
 @echo off
-python ts-type-filter\stats.py
+python ts_type_filter\stats.py
