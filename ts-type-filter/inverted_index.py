@@ -98,7 +98,9 @@ class Index:
     words = self._breaker(query)
     stemmed = {self._stemmer.stem(word) for word in words}
 
-    parts = re.split(r'(\s+)', self._extractor(document))
+    parts = []
+    for text in self._extractor(document):
+      parts.extend(re.split(r'(\s+)', text))
     highlighted = []
     for part in parts:
       if not part.isspace() and self._stemmer.stem(part) in stemmed:

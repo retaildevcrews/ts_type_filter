@@ -1,2 +1,2 @@
 #!/bin/bash
-python src/stats
+python ts-type-filter/stats

@@ -397,7 +397,7 @@ def go():
     print("========================")
 
     symbols, indexer = build_type_index(type_defs)
-    reachable = build_filtered_types(type_defs, symbols, indexer, "apple ham tomato")
+    reachable = build_filtered_types(type_defs, symbols, indexer, "I'll have a ham sandwich with no tomatoes")
 
     for n in reachable:
         print(n.format())

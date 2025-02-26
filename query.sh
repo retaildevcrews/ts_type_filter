@@ -1,2 +1,2 @@
 #!/bin/bash
-python src/query.py "$@"
+python ts-type-filter/query.py "$@"

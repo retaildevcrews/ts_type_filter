@@ -1,2 +1,2 @@
 @echo off
-python src\query.py %*
+python ts-type-filter\query.py %*

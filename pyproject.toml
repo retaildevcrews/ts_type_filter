@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "python-index"
+name = "ts-type-filter"
 version = "0.1.0"
-description = ""
+description = "Experimental library to assist in preparing Typescript type definitions for use in Large Language Model (LLM) prompts."
 authors = ["Michael Hopcroft <mhop@microsoft.com>"]
 
 [tool.poetry.dependencies]
