@@ -8,8 +8,11 @@ def nop_extractor(document):
   The extractor gets the text content out of the document.
 
   This default implementation just returns the document itself.
+
+  Note that the return type is list of string, because some documents
+  may have multiple streams of text (e.g. title, body, etc.)
   """
-  return document
+  return [document]
 
 def break_on_whitespace(text):
   """
@@ -41,8 +44,10 @@ class Index:
     self._documents.add(document)
 
     # Update the postings list
-    text = self._extractor(document)
-    words = self._breaker(text)
+    streams = self._extractor(document)
+    words = []
+    for text in streams:
+      words.extend(self._breaker(text))
     stemmed = {self._stemmer.stem(word) for word in words}
     for word in stemmed:
       if word not in self._postings:

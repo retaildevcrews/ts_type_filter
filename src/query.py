@@ -1,11 +1,11 @@
 from rich import print
 import sys
-import inverted
+from inverted_index import Index
 import sonnets
 
 def go(query):
   # Create an index
-  index = inverted.Index()
+  index = Index()
 
   # Add sonnets to the index
   for sonnet in sonnets.sonnets:

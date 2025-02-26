@@ -1,33 +1,31 @@
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 import json
 
+from inverted_index import Index
 
-class Indexer:
+def extractor(node):
+    text = []
+    if isinstance(node, Literal):
+        text.append(node.text)
+        if node.aliases:
+            text.append(node.aliases)
+    return text
+    
+class TypeIndex:
     def __init__(self):
-        self._nodes = set()
+        self._index = Index(extractor)
         pass
 
     def add(self, node, terms):
-        if "Turkey" in terms:
-            self._nodes.add(node)
-        if "lettuce" in terms:
-            self._nodes.add(node)
-        if "Apple" in terms:
-            self._nodes.add(node)
-    
-        # print(node.format())
-        # print(f"  {terms}")
+        self._index.add(node)
 
     def nodes(self, terms):
-        return self._nodes
-        # nodes = set()
-        # for term in terms:
-        #     if term in self.nodes:
-        #         nodes.add(self.nodes[term])
-        # return [node]
+        matches = self._index.match(terms)
+        return matches
 
 
-class Graph:
+class SymbolTable:
     def __init__(self):
         self.nodes = {}
 
@@ -47,14 +45,17 @@ class Graph:
             print(f"{key}: {type.format()}")
 
 
-class GraphFilter:
-    def __init__(self, graph, nodes):
-        self._graph = graph
-        self._nodes = nodes
+class Subgraph:
+    def __init__(self, symbols, nodes):
+        self._symbols = symbols
+        self._nodes = set(nodes)
         self._filtered = {}
 
+    def keep(self, node):
+        return node in self._nodes
+    
     def original(self, key):
-        return self._graph.get(key)
+        return self._symbols.get(key)
 
     def filtered(self, key):
         return self._filtered.get(key)
@@ -65,12 +66,12 @@ class GraphFilter:
         self._filtered[key] = type
 
 
-def build_graph(nodes):
-    graph = Graph()
+def build_symbol_table(nodes):
+    symbols = SymbolTable()
     for node in nodes:
         if isinstance(node, Define):
-            graph.add(node.name, node)
-    return graph
+            symbols.add(node.name, node)
+    return symbols
 
 
 class Node(ABC):
@@ -90,6 +91,10 @@ class Node(ABC):
 
     @abstractmethod
     def filter(self, nodes):
+        pass
+
+    @abstractmethod
+    def visit(self, subgraph, visitor):
         pass
 
 
@@ -116,6 +121,13 @@ class Define(Node):
         # TODO: do we filter type parameters?
         t = self.type.filter(nodes)
         return Define(self.name, self.params, t)
+    
+    def visit(self, subgraph, visitor):
+        # print(f"visit: {self.format()}")
+        visitor(self)
+        for p in self.params:
+            p.visit(subgraph, visitor)
+        self.type.visit(subgraph, visitor)
 
 
 class Never(Node):
@@ -130,6 +142,10 @@ class Never(Node):
 
     def filter(self, nodes):
         return self
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
 
 
 class Param(Node):
@@ -147,6 +163,11 @@ class Param(Node):
     # TODO: do we filter extends logic?
     def filter(self, nodes):
         return self
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        if self.extends:
+            self.extends.visit(subgraph, visitor)
 
 
 class Union(Node):
@@ -166,6 +187,11 @@ class Union(Node):
         if len(filtered) > 0:
             return Union(*filtered)
         return Never()
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        for t in self.types:
+            t.visit(subgraph, visitor)
 
 
 class Literal(Node):
@@ -182,8 +208,11 @@ class Literal(Node):
             for alias in self.aliases:
                 indexer(self, alias)
 
-    def filter(self, graphFilter):
-        return self if self in graphFilter._nodes else Never()
+    def filter(self, subgraph):
+        return self if subgraph.keep(self) else Never()
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
 
 
 class Struct(Node):
@@ -197,10 +226,15 @@ class Struct(Node):
         for k, v in self.obj.items():
             v.index(graph, indexer)
 
-    def filter(self, nodes):
-        obj = {k: v.filter(nodes) for k, v in self.obj.items()}
+    def filter(self, subgraph):
+        obj = {k: v.filter(subgraph) for k, v in self.obj.items()}
         filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
         return Struct(filtered) if len(filtered) > 0 else Never()
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        for k, v in self.obj.items():
+            v.visit(subgraph, visitor)
 
 
 class Type(Node):
@@ -216,15 +250,28 @@ class Type(Node):
     def index(self, graph, indexer):
         pass
 
-    def filter(self, nodes):
-        filtered = nodes.filtered(self.name)
+    def filter(self, subgraph):
+        # TODO: type chain collapsing / path compression, e.g.
+        #   type Drinks = Juice
+        #   type Juice = {"name": "apple"}
+        # becomes
+        #   type Drinks = {"name": "apple"}
+        filtered = subgraph.filtered(self.name)
         if not filtered:
-            type = nodes.original(self.name)
-            filtered = type.filter(nodes)
-            nodes.add(self.name, filtered)
+            type = subgraph.original(self.name)
+            filtered = type.filter(subgraph)
+            subgraph.add(self.name, filtered)
         if isinstance(filtered, Define) and isinstance(filtered.type, Never):
             return Never()
         return self
+
+    def visit(self, subgraph, visitor):
+        type = subgraph.filtered(self.name)
+        if type:
+            type.visit(subgraph, visitor)
+        if self.params:
+            for p in self.params:
+                p.visit(subgraph, visitor)
 
 
 class Array(Node):
@@ -240,8 +287,17 @@ class Array(Node):
     def filter(self, nodes):
         t = self.type.filter(nodes)
         return Array(t) if not isinstance(t, Never) else Never()
+    
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        self.type.visit(subgraph, visitor)
 
 
+###############################################################################
+#
+# Usage example
+#
+###############################################################################
 def go():
     # a = Literal("abc")
     # print(a.format())
@@ -285,28 +341,56 @@ def go():
             "Juice", [], Struct({"name": Union(Literal("Apple"), Literal("Orange"))})
         ),
     ]
+
+    #
+    # Print out original type definition
+    #
     for x in root:
         print(x.format())
+
+    #
+    # Build the symbol table of defined types
+    #
     print("========================")
-    g = build_graph(root)
-    g.print()
+    g = build_symbol_table(root)
+    # g.print()
 
-    indexer = Indexer()
-
+    #
+    # Build index of terms mentioned in types
+    #
+    indexer = TypeIndex()
     for x in root:
         x.index(g, indexer)
+    # print([x.format() for x in indexer.nodes("dummy")])
 
-    print([x.format() for x in indexer.nodes("dummy")])
+    #
+    # Filter the graph based on search terms
+    #
+    nodes = indexer.nodes("apple ham tomato")
+    subgraph = Subgraph(g, nodes)
+    filtered = [n.filter(subgraph) for n in root]
 
-    nodes = indexer.nodes("dummy")
-    gf = GraphFilter(g, nodes)
-    filtered = [n.filter(gf) for n in root]
-    filtered2 = [
-        n for n in filtered if not (isinstance(n, Define) and isinstance(n.type, Never))
-    ]
-    # filtered = [root[-3].filter(gf)]
+    #
+    # Collect nodes reachable from the root
+    #
+    reachable = OrderedDict()
+    def visitor(node):
+        if isinstance(node, Define):
+            # print(f"add: {node.format()}")
+            reachable[node] = None
+            # filtered2.add(node)
+            # for n in filtered2:
+            #     print(f"  {n.format()}")
+
+    filtered[0].visit(subgraph, visitor)
+
+    # filtered = [n.filter(subgraph) for n in root]
+    # filtered2 = [
+    #     n for n in filtered if not (isinstance(n, Define) and isinstance(n.type, Never))
+    # ]
+
     print('-----------------------')
-    for n in filtered2:
+    for n in reachable:
         print(n.format())
 
 
