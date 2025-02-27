@@ -50,10 +50,17 @@ class Subgraph:
         self._symbols = symbols
         self._nodes = set(nodes)
         self._filtered = {}
+        self._context = []
 
     def keep(self, node):
         return node in self._nodes
-    
+    # is_local(), push(), and pop() are for handling type parameters.
+    def is_local(self, key):
+        for symbols in self._context:
+            if key in symbols:
+                return True
+        return False
+
     def original(self, key):
         return self._symbols.get(key)
 
@@ -64,6 +71,12 @@ class Subgraph:
         if key in self._filtered:
             raise ValueError(f"Key {key} already exists in the graph.")
         self._filtered[key] = type
+
+    def push(self, symbols):
+        self._context.append(symbols)
+
+    def pop(self):
+        self._context.pop()
 
 
 class Node(ABC):
@@ -109,10 +122,21 @@ class Define(Node):
             param.index(symbols, indexer)
         self.type.index(symbols, indexer)
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
+        print(f"FILTER: {self.format()}")
         # TODO: do we filter type parameters?
-        t = self.type.filter(nodes)
-        return Define(self.name, self.params, t)
+        filtered_params = [p.filter(subgraph) for p in self.params]
+        if any(isinstance(p, Never) for p in filtered_params):
+            return Never()
+        # for p in self.params:
+        #     p.filter(subgraph)
+        context = [p.name for p in self.params]
+        if len(context) > 0:
+            subgraph.push(context)
+        t = self.type.filter(subgraph)
+        if len(context) > 0:
+            subgraph.pop()
+        return Define(self.name, filtered_params, t)
     
     def visit(self, subgraph, visitor):
         # print(f"visit: {self.format()}")
@@ -146,7 +170,7 @@ class Param(Node):
         self.extends = extends
 
     def format(self):
-        return self.name + (f" extends {self.extends}" if self.extends else "")
+        return self.name + (f" extends {self.extends.format()}" if self.extends else "")
 
     def index(self, symbols, indexer):
         if self.extends:
@@ -154,6 +178,11 @@ class Param(Node):
 
     # TODO: do we filter extends logic?
     def filter(self, nodes):
+        if self.extends:
+            t = self.extends.filter(nodes)
+            if isinstance(t, Never):
+                return Never()
+            return Param(self.name, t)
         return self
     
     def visit(self, subgraph, visitor):
@@ -221,7 +250,8 @@ class Struct(Node):
     def filter(self, subgraph):
         obj = {k: v.filter(subgraph) for k, v in self.obj.items()}
         filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
-        return Struct(filtered) if len(filtered) > 0 else Never()
+        return Struct(filtered) if len(filtered) == len(obj) else Never()
+        # return Struct(filtered) if len(filtered) > 0 else Never()
     
     def visit(self, subgraph, visitor):
         visitor(self)
@@ -248,13 +278,16 @@ class Type(Node):
         #   type Juice = {"name": "apple"}
         # becomes
         #   type Drinks = {"name": "apple"}
-        filtered = subgraph.filtered(self.name)
-        if not filtered:
-            type = subgraph.original(self.name)
-            filtered = type.filter(subgraph)
-            subgraph.add(self.name, filtered)
-        if isinstance(filtered, Define) and isinstance(filtered.type, Never):
-            return Never()
+        # if the type is not a generic type parameter
+        if not subgraph.is_local(self.name):
+            # TODO: BUGBUG: isn't it possible to have two instances of the same generic with different type parameters?
+            filtered = subgraph.filtered(self.name)
+            if not filtered:
+                type = subgraph.original(self.name)
+                filtered = type.filter(subgraph)
+                subgraph.add(self.name, filtered)
+            if isinstance(filtered, Define) and isinstance(filtered.type, Never):
+                return Never()
         return self
 
     def visit(self, subgraph, visitor):
@@ -286,7 +319,7 @@ class Array(Node):
 
 
 #
-#
+# Builders
 #
 def build_symbol_table(nodes):
     symbols = SymbolTable()
