@@ -4,6 +4,7 @@ import json
 
 from .inverted_index import Index
 
+
 def extractor(node):
     text = []
     if isinstance(node, Literal):
@@ -11,7 +12,8 @@ def extractor(node):
         if node.aliases:
             text.append(node.aliases)
     return text
-    
+
+
 class TypeIndex:
     def __init__(self):
         self._index = Index(extractor)
@@ -54,6 +56,7 @@ class Subgraph:
 
     def keep(self, node):
         return node in self._nodes
+
     # is_local(), push(), and pop() are for handling type parameters.
     def is_local(self, key):
         for symbols in self._context:
@@ -77,6 +80,14 @@ class Subgraph:
 
     def pop(self):
         self._context.pop()
+
+    def process(self, name):
+        filtered = self.filtered(name)
+        if not filtered:
+            type = self.original(name)
+            filtered = type.filter(self)
+            self.add(name, filtered)
+        return filtered
 
 
 class Node(ABC):
@@ -123,7 +134,7 @@ class Define(Node):
         self.type.index(symbols, indexer)
 
     def filter(self, subgraph):
-        print(f"FILTER: {self.format()}")
+        # print(f"FILTER: {self.format()}")
         # TODO: do we filter type parameters?
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(isinstance(p, Never) for p in filtered_params):
@@ -137,7 +148,7 @@ class Define(Node):
         if len(context) > 0:
             subgraph.pop()
         return Define(self.name, filtered_params, t)
-    
+
     def visit(self, subgraph, visitor):
         # print(f"visit: {self.format()}")
         visitor(self)
@@ -158,7 +169,7 @@ class Never(Node):
 
     def filter(self, nodes):
         return self
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
         pass
@@ -184,7 +195,7 @@ class Param(Node):
                 return Never()
             return Param(self.name, t)
         return self
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
         if self.extends:
@@ -208,7 +219,7 @@ class Union(Node):
         if len(filtered) > 0:
             return Union(*filtered)
         return Never()
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
         for t in self.types:
@@ -231,7 +242,7 @@ class Literal(Node):
 
     def filter(self, subgraph):
         return self if subgraph.keep(self) else Never()
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
 
@@ -241,7 +252,7 @@ class Struct(Node):
         self.obj = obj
 
     def format(self):
-        return "{" + ",".join(f'"{k}":{v.format()}' for k, v in self.obj.items()) + "}"
+        return "{" + ",".join(f"{k}:{v.format()}" for k, v in self.obj.items()) + "}"
 
     def index(self, symbols, indexer):
         for k, v in self.obj.items():
@@ -252,7 +263,7 @@ class Struct(Node):
         filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
         return Struct(filtered) if len(filtered) == len(obj) else Never()
         # return Struct(filtered) if len(filtered) > 0 else Never()
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
         for k, v in self.obj.items():
@@ -280,12 +291,23 @@ class Type(Node):
         #   type Drinks = {"name": "apple"}
         # if the type is not a generic type parameter
         if not subgraph.is_local(self.name):
+            if self.name == "Q":
+                print(123)
             # TODO: BUGBUG: isn't it possible to have two instances of the same generic with different type parameters?
-            filtered = subgraph.filtered(self.name)
-            if not filtered:
-                type = subgraph.original(self.name)
-                filtered = type.filter(subgraph)
-                subgraph.add(self.name, filtered)
+            if self.params:
+                type_parameters = [subgraph.process(x.name) for x in self.params]
+                if any(
+                    isinstance(param, Define) and isinstance(param.type, Never)
+                    for param in type_parameters
+                ):
+                    return Never()
+
+            # filtered = subgraph.filtered(self.name)
+            # if not filtered:
+            #     type = subgraph.original(self.name)
+            #     filtered = type.filter(subgraph)
+            #     subgraph.add(self.name, filtered)
+            filtered = subgraph.process(self.name)
             if isinstance(filtered, Define) and isinstance(filtered.type, Never):
                 return Never()
         return self
@@ -312,7 +334,7 @@ class Array(Node):
     def filter(self, nodes):
         t = self.type.filter(nodes)
         return Array(t) if not isinstance(t, Never) else Never()
-    
+
     def visit(self, subgraph, visitor):
         visitor(self)
         self.type.visit(subgraph, visitor)
@@ -328,6 +350,7 @@ def build_symbol_table(nodes):
             symbols.add(node.name, node)
     return symbols
 
+
 def build_type_index(type_defs):
     # Build the symbol table for type name references.
     symbols = build_symbol_table(type_defs)
@@ -339,6 +362,7 @@ def build_type_index(type_defs):
 
     return symbols, indexer
 
+
 def build_filtered_types(type_defs, symbols, indexer, text):
     # Filter the graph based on search terms
     nodes = indexer.nodes(text)
@@ -347,12 +371,14 @@ def build_filtered_types(type_defs, symbols, indexer, text):
 
     # Collect nodes reachable from the root
     reachable = OrderedDict()
+
     def visitor(node):
         if isinstance(node, Define):
             reachable[node] = None
 
     filtered[0].visit(subgraph, visitor)
     return reachable
+
 
 def collect_string_literals(data):
     """
@@ -378,4 +404,3 @@ def collect_string_literals(data):
 
     _collect(data)
     return literals
-
