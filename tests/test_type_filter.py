@@ -1,4 +1,3 @@
-import json
 import pytest
 
 from ts_type_filter import (
@@ -7,7 +6,8 @@ from ts_type_filter import (
     build_filtered_types,
     Define,
     Literal,
-    Param,
+    ParamDef,
+    ParamRef,
     Struct,
     Type,
     Union,
@@ -27,48 +27,20 @@ def parse(expected):
     return set(no_blanks)
 
 
-# class TestDefine:
-#     def test_keep_rhs(self):
-#         type_defs = [Define("Root", [], Type("A")), Define("A", [], Literal("B"))]
-#         observed = filter(type_defs, "B")
-#         expected = set(['type Root=A;', 'type A="B";'])
-#         assert observed == expected
-
-#     def test_filter_rhs(self):
-#         type_defs = [Define("Root", [], Type("A")), Define("A", [], Literal("B"))]
-#         observed = filter(type_defs, "C")
-#         expected = set(['type Root=never;'])
-#         assert observed == expected
-
-type_defs1 = [Define("Root", [], Type("A")), Define("A", [], Literal("B"))]
-type_defs2 = [Define("Root", [], Type("A")), Define("A", [Param("B")], Literal("C"))]
-type_defs3 = [
-    Define("Root", [], Type("A")),
-    Define("A", [Param("B", Type("D"))], Literal("C")),
-    Define("D", [], Literal("E")),
-]
-
-type_defs4 = [
-    Define("Root", [], Struct({"items": Array(Type("A"))})),
-    Define("A", [], Union(Type("B"), Type("C"))),
-    Define("B", [Param("D")], Struct({"name": Literal("")})),
-    Define("C", [Param("E"), Type("F")], Struct({"name": Literal("")})),
-]
-
-type_defs5 = [
+type_defs = [
     Define("Cart", [], Struct({"items": Array(Type("Item"))})),
     Define(
         "Item",
         [],
-        Union(Type("P"), Type("Q", [Param("V")]), Type("R", [Param("WXYZ")])),
+        Union(Type("P"), Type("Q", [ParamRef("V")]), Type("R", [ParamRef("WXYZ")])),
     ),
     Define(
         "P",
         [],
         Struct({"p1": Type("V"), "p2": Type("W"), "p3": Type("X"), "p4": Type("Y")}),
     ),
-    Define("Q", [Param("T")], Struct({"q1": Type("T")})),
-    Define("R", [Param("T", Type("WXYZ"))], Struct({"r1": Type("T")})),
+    Define("Q", [ParamDef("T")], Struct({"q1": Type("T")})),
+    Define("R", [ParamDef("T", Type("WXYZ"))], Struct({"r1": Type("T")})),
     Define("WXYZ", [], Union(Type("W"), Type("X"), Type("Y"), Type("Z"))),
     Define("V", [], Literal("v")),
     Define("W", [], Literal("w")),
@@ -77,21 +49,11 @@ type_defs5 = [
     Define("Z", [], Literal("z")),
 ]
 
-# Test cases as (input, expected_output, test_name)
-# test_cases = [
-#     (type_defs1, "B", ["type Root=A;", 'type A="B";'], "keep A"),
-#     (type_defs1, "C", ["type Root=never;"], "prune A"),
-#     (type_defs2, "C", ["type Root=A;", 'type A<B>="C";'], "prune A"),
-#     (type_defs2, "D", ["type Root=never;"], "prune A"),
-#     (type_defs2, "B D", ["type Root=never;"], "prune A"),
-#     (type_defs3, "E", ["type Root=never;"], "prune A"),
-#     (type_defs3, "C E", [d.format() for d in type_defs3], "prune A"),
-# ]
 test_cases = [
-    (type_defs5, "", "type Cart=never;", "no search term"),
-    (type_defs5, "bad", "type Cart=never;", "non existant search term"),
+    (type_defs, "", "type Cart=never;", "no search term"),
+    (type_defs, "bad", "type Cart=never;", "non existant search term"),
     (
-        type_defs5,
+        type_defs,
         "v w x y z",
         """
           type Cart={items:Item[]};
@@ -111,8 +73,7 @@ test_cases = [
         "all search terms",
     ),
     (
-        # Test failes because `type Item=Q<V>` doesn't visit `V`.
-        type_defs5,
+        type_defs,
         "v",
         """
           type Cart={items:Item[]};
@@ -124,13 +85,56 @@ test_cases = [
         """,
         "union1",
     ),
+    (
+        type_defs,
+        "v w",
+        """
+            type Cart={items:Item[]};
+            type Item=Q<V>|R<WXYZ>;
+            type Q<T>={q1:T};
+            type R<T extends WXYZ>={r1:T};
+            type WXYZ=W;
+            type V="v";
+            type W="w";
+        """,
+        "union2",
+    ),
+    (
+        type_defs,
+        "w x y z",
+        """
+            type Cart={items:Item[]};
+            type Item=R<WXYZ>;
+            type R<T extends WXYZ>={r1:T};
+            type WXYZ=W|X|Y|Z;
+            type W="w";
+            type X="x";
+            type Y="y";
+            type Z="z";
+        """,
+        "struct1",
+    ),
+    (
+        type_defs,
+        "x y",
+        """
+            type Cart={items:Item[]};
+            type Item=R<WXYZ>;
+            type R<T extends WXYZ>={r1:T};
+            type WXYZ=X|Y;
+            type X="x";
+            type Y="y";
+        """,
+        "struct2",
+    ),
+    # TODO: subgraph.is_local(self.name)
 ]
 
 
 @pytest.mark.parametrize(
     "type_defs, query, expected, test_name", test_cases, ids=[x[3] for x in test_cases]
 )
-def test_square(type_defs, query, expected, test_name):
+def test_one_case(type_defs, query, expected, test_name):
     expected = parse(expected)
     observed = filter(type_defs, query)
     o = list(observed)

@@ -175,7 +175,7 @@ class Never(Node):
         pass
 
 
-class Param(Node):
+class ParamDef(Node):
     def __init__(self, name, extends=None):
         self.name = name
         self.extends = extends
@@ -193,13 +193,36 @@ class Param(Node):
             t = self.extends.filter(nodes)
             if isinstance(t, Never):
                 return Never()
-            return Param(self.name, t)
+            return ParamDef(self.name, t)
         return self
 
     def visit(self, subgraph, visitor):
         visitor(self)
         if self.extends:
             self.extends.visit(subgraph, visitor)
+
+
+class ParamRef(Node):
+    def __init__(self, name):
+        self.name = name
+
+    def format(self):
+        return self.name
+
+    def index(self, symbols, indexer):
+        pass
+
+    # TODO: do we filter extends logic?
+    def filter(self, nodes):
+        # TODO: code like in Type
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        if not subgraph.is_local(self.name):
+            type = subgraph.filtered(self.name)
+            if type:
+                type.visit(subgraph, visitor)
 
 
 class Union(Node):
