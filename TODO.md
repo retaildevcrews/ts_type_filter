@@ -1,17 +1,7 @@
 # TODO
 
-* Unit tests
-* build_Filtered_types() should take list of text streams
-* Referencing type parameters
-* Path compression
-  * Example
-    * type A = B
-    * type B = C
-  * Example
-    * type A<B extends C> = {x: B}
-    * type C = "one_literal"
-    * Could become type A = {x: "one_literal"}
 * Optional struct members
+* build_Filtered_types() should take list of text streams
 * Some way to stop filtering so that Cart cannot be never?
 * Comment parameter for types
 * Better minification (e.g. newlines)
@@ -23,8 +13,33 @@
 * Scenario - defaults
   * Defaults may not be mentioned by customer, causing filtering
   * Choose
+* . Unit tests
+  * . type filtlering
+    * subgraph.is_local(self.name)
+  * collect string literals
+  * inverted index
+* . Referencing type parameters
+* Path compression
+  * x Example
+    * x type A = B
+    * x type B = C
+  * Example
+    * type A<B extends C> = {x: B}
+    * type C = "one_literal"
+    * Could become type A = {x: "one_literal"}
 * Scenario
     * type A<B extends C> = {x: B}
     * type C = never
     * Should collapse to never
 
+Path compression scenarios:
+
+type Cart={items:Item[]};
+type Item=Q<V>;
+type Q<T>={q1:T};
+type V="v";
+
+becomes
+
+type Cart={items:Item[]};
+type Item={q1:"v"};

@@ -32,7 +32,12 @@ type_defs = [
     Define(
         "Item",
         [],
-        Union(Type("P"), Type("Q", [ParamRef("V")]), Type("R", [ParamRef("WXYZ")])),
+        Union(
+            Type("J"),
+            Type("P"),
+            Type("Q", [ParamRef("V")]),
+            Type("R", [ParamRef("WXYZ")]),
+        ),
     ),
     Define(
         "P",
@@ -47,6 +52,9 @@ type_defs = [
     Define("X", [], Literal("x")),
     Define("Y", [], Literal("y")),
     Define("Z", [], Literal("z")),
+    Define("J", [], Type("K")),
+    Define("K", [], Type("L")),
+    Define("L", [], Union(Literal("l"), Literal("m"))),
 ]
 
 test_cases = [
@@ -93,9 +101,8 @@ test_cases = [
             type Item=Q<V>|R<WXYZ>;
             type Q<T>={q1:T};
             type R<T extends WXYZ>={r1:T};
-            type WXYZ=W;
+            type WXYZ="w";
             type V="v";
-            type W="w";
         """,
         "union2",
     ),
@@ -126,6 +133,24 @@ test_cases = [
             type Y="y";
         """,
         "struct2",
+    ),
+    (
+        type_defs,
+        "l",
+        """
+            type Cart={items:Item[]};
+            type Item="l";
+        """,
+        "path collapse 1",
+    ),
+    (
+        type_defs,
+        "l m",
+        """
+            type Cart={items:Item[]};
+            type Item="l"|"m";
+        """,
+        "path collapse 2",
     ),
     # TODO: subgraph.is_local(self.name)
 ]

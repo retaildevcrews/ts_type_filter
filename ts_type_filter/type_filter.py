@@ -134,23 +134,25 @@ class Define(Node):
         self.type.index(symbols, indexer)
 
     def filter(self, subgraph):
-        # print(f"FILTER: {self.format()}")
-        # TODO: do we filter type parameters?
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(isinstance(p, Never) for p in filtered_params):
             return Never()
-        # for p in self.params:
-        #     p.filter(subgraph)
+
         context = [p.name for p in self.params]
         if len(context) > 0:
             subgraph.push(context)
         t = self.type.filter(subgraph)
+        if (len(self.params) == 0):
+            while t and isinstance(t, Type):
+                if t.params and len(t.params) > 0:
+                    break
+                t = subgraph.filtered(t.name).type
+
         if len(context) > 0:
             subgraph.pop()
         return Define(self.name, filtered_params, t)
 
     def visit(self, subgraph, visitor):
-        # print(f"visit: {self.format()}")
         visitor(self)
         for p in self.params:
             p.visit(subgraph, visitor)
@@ -239,9 +241,12 @@ class Union(Node):
     def filter(self, nodes):
         types = [t.filter(nodes) for t in self.types]
         filtered = [t for t in types if not isinstance(t, Never)]
-        if len(filtered) > 0:
+        if len(filtered) == 0:
+            return Never()
+        elif len(filtered) == 1:
+            return filtered[0]
+        else:
             return Union(*filtered)
-        return Never()
 
     def visit(self, subgraph, visitor):
         visitor(self)
@@ -285,7 +290,6 @@ class Struct(Node):
         obj = {k: v.filter(subgraph) for k, v in self.obj.items()}
         filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
         return Struct(filtered) if len(filtered) == len(obj) else Never()
-        # return Struct(filtered) if len(filtered) > 0 else Never()
 
     def visit(self, subgraph, visitor):
         visitor(self)
@@ -307,15 +311,7 @@ class Type(Node):
         pass
 
     def filter(self, subgraph):
-        # TODO: type chain collapsing / path compression, e.g.
-        #   type Drinks = Juice
-        #   type Juice = {"name": "apple"}
-        # becomes
-        #   type Drinks = {"name": "apple"}
-        # if the type is not a generic type parameter
         if not subgraph.is_local(self.name):
-            if self.name == "Q":
-                print(123)
             # TODO: BUGBUG: isn't it possible to have two instances of the same generic with different type parameters?
             if self.params:
                 type_parameters = [subgraph.process(x.name) for x in self.params]
@@ -325,14 +321,10 @@ class Type(Node):
                 ):
                     return Never()
 
-            # filtered = subgraph.filtered(self.name)
-            # if not filtered:
-            #     type = subgraph.original(self.name)
-            #     filtered = type.filter(subgraph)
-            #     subgraph.add(self.name, filtered)
             filtered = subgraph.process(self.name)
             if isinstance(filtered, Define) and isinstance(filtered.type, Never):
                 return Never()
+
         return self
 
     def visit(self, subgraph, visitor):
