@@ -136,13 +136,13 @@ class Define(Node):
     def filter(self, subgraph):
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(isinstance(p, Never) for p in filtered_params):
-            return Never()
+            return Define(self.name, filtered_params, Never())
 
         context = [p.name for p in self.params]
         if len(context) > 0:
             subgraph.push(context)
         t = self.type.filter(subgraph)
-        if (len(self.params) == 0):
+        if len(self.params) == 0:
             while t and isinstance(t, Type):
                 if t.params and len(t.params) > 0:
                     break
@@ -205,26 +205,31 @@ class ParamDef(Node):
 
 
 class ParamRef(Node):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, type):
+        self.type = type
 
     def format(self):
-        return self.name
+        return self.type.format()
 
     def index(self, symbols, indexer):
-        pass
+        self.type.index(symbols, indexer)
 
     # TODO: do we filter extends logic?
     def filter(self, nodes):
         # TODO: code like in Type
+        type = self.type.filter(nodes)
+        if isinstance(type, Never):
+            return Never()
         return self
 
     def visit(self, subgraph, visitor):
         visitor(self)
-        if not subgraph.is_local(self.name):
-            type = subgraph.filtered(self.name)
-            if type:
-                type.visit(subgraph, visitor)
+        if not isinstance(self.type, Never):
+            self.type.visit(subgraph, visitor)
+        # if not subgraph.is_local(self.name):
+        #     type = subgraph.filtered(self.name)
+        #     if type:
+        #         type.visit(subgraph, visitor)
 
 
 class Union(Node):
@@ -238,8 +243,8 @@ class Union(Node):
         for type in self.types:
             type.index(symbols, indexer)
 
-    def filter(self, nodes):
-        types = [t.filter(nodes) for t in self.types]
+    def filter(self, subgraph):
+        types = [t.filter(subgraph) for t in self.types]
         filtered = [t for t in types if not isinstance(t, Never)]
         if len(filtered) == 0:
             return Never()
@@ -308,15 +313,20 @@ class Type(Node):
         )
 
     def index(self, symbols, indexer):
-        pass
+        # print(f"indexing {self.name}")
+        if self.params:
+            for p in self.params:
+                p.index(symbols, indexer)
 
     def filter(self, subgraph):
-        if not subgraph.is_local(self.name):
+        if not subgraph.is_local(self.name): # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
             # TODO: BUGBUG: isn't it possible to have two instances of the same generic with different type parameters?
             if self.params:
-                type_parameters = [subgraph.process(x.name) for x in self.params]
+                # type_parameters = [subgraph.process(x.name) for x in self.params]
+                type_parameters = [x.filter(subgraph) for x in self.params]
                 if any(
-                    isinstance(param, Define) and isinstance(param.type, Never)
+                    (isinstance(param, Define) and isinstance(param.type, Never))
+                    or isinstance(param, Never)
                     for param in type_parameters
                 ):
                     return Never()

@@ -1,5 +1,7 @@
 # TODO
 
+* Should be able to mark members as default. They will never be filtered.
+  * e.g. Regular
 * Optional struct members
 * build_Filtered_types() should take list of text streams
 * Some way to stop filtering so that Cart cannot be never?

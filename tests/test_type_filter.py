@@ -35,8 +35,8 @@ type_defs = [
         Union(
             Type("J"),
             Type("P"),
-            Type("Q", [ParamRef("V")]),
-            Type("R", [ParamRef("WXYZ")]),
+            Type("Q", [ParamRef(Type("V"))]),
+            Type("R", [ParamRef(Type("WXYZ"))]),
         ),
     ),
     Define(
