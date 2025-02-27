@@ -114,6 +114,25 @@ class Node(ABC):
         pass
 
 
+class Array(Node):
+    def __init__(self, type):
+        self.type = type
+
+    def format(self):
+        return self.type.format() + "[]"
+
+    def index(self, symbols, indexer):
+        self.type.index(symbols, indexer)
+
+    def filter(self, nodes):
+        t = self.type.filter(nodes)
+        return Array(t) if not isinstance(t, Never) else Never()
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        self.type.visit(subgraph, visitor)
+
+
 class Define(Node):
     def __init__(self, name, params, type):
         self.name = name
@@ -157,6 +176,27 @@ class Define(Node):
         for p in self.params:
             p.visit(subgraph, visitor)
         self.type.visit(subgraph, visitor)
+
+
+class Literal(Node):
+    def __init__(self, text, aliases=None):
+        self.text = text
+        self.aliases = aliases
+
+    def format(self):
+        return json.dumps(self.text)
+
+    def index(self, symbols, indexer):
+        indexer.add(self, self.text)
+        if self.aliases:
+            for alias in self.aliases:
+                indexer(self, alias)
+
+    def filter(self, subgraph):
+        return self if subgraph.keep(self) else Never()
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
 
 
 class Never(Node):
@@ -232,54 +272,6 @@ class ParamRef(Node):
         #         type.visit(subgraph, visitor)
 
 
-class Union(Node):
-    def __init__(self, *types):
-        self.types = types
-
-    def format(self):
-        return "|".join([t.format() for t in self.types])
-
-    def index(self, symbols, indexer):
-        for type in self.types:
-            type.index(symbols, indexer)
-
-    def filter(self, subgraph):
-        types = [t.filter(subgraph) for t in self.types]
-        filtered = [t for t in types if not isinstance(t, Never)]
-        if len(filtered) == 0:
-            return Never()
-        elif len(filtered) == 1:
-            return filtered[0]
-        else:
-            return Union(*filtered)
-
-    def visit(self, subgraph, visitor):
-        visitor(self)
-        for t in self.types:
-            t.visit(subgraph, visitor)
-
-
-class Literal(Node):
-    def __init__(self, text, aliases=None):
-        self.text = text
-        self.aliases = aliases
-
-    def format(self):
-        return json.dumps(self.text)
-
-    def index(self, symbols, indexer):
-        indexer.add(self, self.text)
-        if self.aliases:
-            for alias in self.aliases:
-                indexer(self, alias)
-
-    def filter(self, subgraph):
-        return self if subgraph.keep(self) else Never()
-
-    def visit(self, subgraph, visitor):
-        visitor(self)
-
-
 class Struct(Node):
     def __init__(self, obj):
         self.obj = obj
@@ -346,23 +338,31 @@ class Type(Node):
                 p.visit(subgraph, visitor)
 
 
-class Array(Node):
-    def __init__(self, type):
-        self.type = type
+class Union(Node):
+    def __init__(self, *types):
+        self.types = types
 
     def format(self):
-        return self.type.format() + "[]"
+        return "|".join([t.format() for t in self.types])
 
     def index(self, symbols, indexer):
-        self.type.index(symbols, indexer)
+        for type in self.types:
+            type.index(symbols, indexer)
 
-    def filter(self, nodes):
-        t = self.type.filter(nodes)
-        return Array(t) if not isinstance(t, Never) else Never()
+    def filter(self, subgraph):
+        types = [t.filter(subgraph) for t in self.types]
+        filtered = [t for t in types if not isinstance(t, Never)]
+        if len(filtered) == 0:
+            return Never()
+        elif len(filtered) == 1:
+            return filtered[0]
+        else:
+            return Union(*filtered)
 
     def visit(self, subgraph, visitor):
         visitor(self)
-        self.type.visit(subgraph, visitor)
+        for t in self.types:
+            t.visit(subgraph, visitor)
 
 
 #
