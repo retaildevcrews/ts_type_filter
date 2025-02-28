@@ -61,15 +61,20 @@ class Index:
     order they were added to the index.
 
     Args:
-      query (str): The search query string. Consists of a sequence of
-      words separated by whitespace. A document is considered a match
-      if it contains a stemmed version of at least one of the words in
-      the query.
+      query (str or list): The search query, which can be a string or a
+      list of strings, each of which onsists of a sequence of words that
+      can be isolated by the word breaker. A document is considered a
+      match if it contains a stemmed version of at least one of the words
+      in the query.
 
     Returns:
       list: A list of documents that match the query.
     """
-    words = self._breaker(query)
+    if isinstance(query, str):
+      query = [query]
+    words = []
+    for part in query:
+      words.extend(self._breaker(part))
     stemmed = {self._stemmer.stem(word) for word in words}
 
     matches = set()

@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "menu",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "private/menu.py",
+      "console": "integratedTerminal",
+      "args": [
+        "fire",
+      ]
+    },
+    {
       "name": "query",
       "type": "debugpy",
       "request": "launch",

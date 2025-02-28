@@ -266,10 +266,6 @@ class ParamRef(Node):
         visitor(self)
         if not isinstance(self.type, Never):
             self.type.visit(subgraph, visitor)
-        # if not subgraph.is_local(self.name):
-        #     type = subgraph.filtered(self.name)
-        #     if type:
-        #         type.visit(subgraph, visitor)
 
 
 class Struct(Node):

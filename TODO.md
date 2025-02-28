@@ -1,11 +1,12 @@
 # TODO
 
+* build_Filtered_types() should take list of text streams
+* Defaults
+* Hint/Comment parameter for types
+* Optional struct members
 * Should be able to mark members as default. They will never be filtered.
   * e.g. Regular
-* Optional struct members
-* build_Filtered_types() should take list of text streams
 * Some way to stop filtering so that Cart cannot be never?
-* Comment parameter for types
 * Better minification (e.g. newlines)
 * Some means of pretty printing
 * Some minimal type checking
