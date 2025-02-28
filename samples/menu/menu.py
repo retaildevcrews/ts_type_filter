@@ -29,6 +29,8 @@ type_defs = [
             Type("Burger"),
             Type("Chicken"),
             Type("KoreanChicken"),
+            Type("Pitas"),
+            Type("Fish"),
             Type(
                 "GenericFountainDrink",
                 [ParamRef(Type("DrinkNames")), ParamRef(Type("DrinkSizes"))],
@@ -69,9 +71,9 @@ type_defs = [
                     Type("Burger"),
                     Type("Chicken"),
                     Type("KoreanChicken"),
-                    # Type("Pitas"),
-                    # Type("Fish"),
-                    # Type("CHOOSE"),
+                    Type("Pitas"),
+                    Type("Fish"),
+                    Type("CHOOSE"),
                 ),
                 "fries": Union(
                     Type("FrenchFries", [ParamRef(Type("SIZE"))]), Type("CHOOSE")
@@ -238,6 +240,50 @@ type_defs = [
         ),
     ),
     Define(
+        "Pitas",
+        [],
+        Struct(
+            {
+                "name": Union(
+                    Literal("Lemon Chicken Pita"),
+                    Literal("Smokey Chicken Pita"),
+                    Literal("Tangy Chicken Pita"),
+                ),
+                "options?": Array(
+                    Union(
+                        Type("Veggies"),
+                        Type("Bacon"),
+                        Type("Cheeses"),
+                        Type("Sauces"),
+                        Type("Condiments"),
+                        Type("Extras"),
+                    )
+                ),
+            }
+        ),
+    ),
+    Define(
+        "Fish",
+        [],
+        Struct(
+            {
+                "name": Literal(
+                    "Captain Nemo Burger", ["white fish cod scrod sandwich"]
+                ),
+                "options?": Array(
+                    Union(
+                        Type("Veggies"),
+                        Type("Bacon"),
+                        Type("Cheeses"),
+                        Type("Condiments"),
+                        Type("Preparations"),
+                        Type("Extras"),
+                    )
+                ),
+            }
+        ),
+    ),
+    Define(
         "FrenchFries",
         [ParamDef("SIZE", Type("ComboSizes"))],
         Struct(
@@ -272,7 +318,7 @@ type_defs = [
         Struct(
             {
                 "name": Union(
-                    Literal("Jalopeno Poppers"),
+                    Literal("Jalapeno Poppers"),
                     Literal("Mozzarella Sticks"),
                 ),
                 "size": Type("SIZE"),
@@ -314,6 +360,7 @@ type_defs = [
             {
                 "name": Type("NAME"),
                 "size": Type("SIZE"),
+                "options?": Array(Type("Ice"))
             }
         ),
     ),
@@ -348,6 +395,16 @@ type_defs = [
         ),
     ),
     Define(
+        "Ice",
+        [],
+        Struct(
+            {
+                "name": Literal("Ice"),
+                "amount": Union(Literal("Regular"), Literal("Light"), Literal("No")),
+            }
+        ),
+    ),
+    Define(
         "Veggies",
         [],
         Struct(
@@ -363,31 +420,6 @@ type_defs = [
             }
         ),
     ),
-    # Define(
-    #     "Cheeses",
-    #     [],
-    #     Struct(
-    #         {
-    #             "amount": Type("Optional"),
-    #             "name": Union(
-    #                 Literal("American Cheese"),
-    #                 Literal("Cheddar Cheese"),
-    #                 Literal("Swiss Cheese"),
-    #             ),
-    #         }
-    #     ),
-    # ),
-    # # TODO: make GenericCheese
-    # Define(
-    #     "AmericanCheese",
-    #     [],
-    #     Struct(
-    #         {
-    #             "amount": Type("Optional"),
-    #             "name": Literal("American Cheese"),
-    #         }
-    #     ),
-    # ),
     Define(
         "Cheeses",
         [],
