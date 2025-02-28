@@ -10,7 +10,7 @@ def extractor(node):
     if isinstance(node, Literal):
         text.append(node.text)
         if node.aliases:
-            text.append(node.aliases)
+            text.extend(node.aliases)
     return text
 
 
@@ -19,8 +19,10 @@ class TypeIndex:
         self._index = Index(extractor)
         pass
 
-    def add(self, node, terms):
+    def add(self, node):
         self._index.add(node)
+        if node.pinned:
+            self._index.pin(node)
 
     def nodes(self, terms):
         matches = self._index.match(terms)
@@ -180,18 +182,16 @@ class Define(Node):
 
 
 class Literal(Node):
-    def __init__(self, text, aliases=None):
+    def __init__(self, text, aliases=None, pinned=False):
         self.text = text
         self.aliases = aliases
+        self.pinned = pinned
 
     def format(self):
         return json.dumps(self.text)
 
     def index(self, symbols, indexer):
-        indexer.add(self, self.text)
-        if self.aliases:
-            for alias in self.aliases:
-                indexer(self, alias)
+        indexer.add(self)
 
     def filter(self, subgraph):
         return self if subgraph.keep(self) else Never()
@@ -390,6 +390,11 @@ def build_filtered_types(type_defs, symbols, indexer, text):
     nodes = indexer.nodes(text)
     subgraph = Subgraph(symbols, nodes)
     filtered = [n.filter(subgraph) for n in type_defs]
+
+    print("+++++++++++++++")
+    for n in filtered:
+        print(n.format())
+    print("+++++++++++++++")
 
     # Collect nodes reachable from the root
     reachable = OrderedDict()

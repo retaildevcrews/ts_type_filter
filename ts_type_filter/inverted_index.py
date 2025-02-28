@@ -33,6 +33,7 @@ class Index:
     self._documents_in_order = []
     self._documents = set()
     self._postings = {}
+    self._pinned = set()
     
 
   def add(self, document):
@@ -53,6 +54,10 @@ class Index:
       if word not in self._postings:
         self._postings[word] = []
       self._postings[word].append(document)
+
+  def pin(self, document):
+    self._pinned.add(document)
+
 
   def match(self, query):
     """
@@ -77,7 +82,7 @@ class Index:
       words.extend(self._breaker(part))
     stemmed = {self._stemmer.stem(word) for word in words}
 
-    matches = set()
+    matches = set(self._pinned)
     for word in stemmed:
       if word in self._postings:
         matches.update(self._postings[word])

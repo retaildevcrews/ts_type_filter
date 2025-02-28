@@ -1,7 +1,7 @@
 # TODO
 
 * x build_Filtered_types() should take list of text streams
-* Defaults
+* x Pinned nodes / defaults
 * x Hint/Comment parameter for types
 * Optional struct members
 * Should be able to mark members as default. They will never be filtered.

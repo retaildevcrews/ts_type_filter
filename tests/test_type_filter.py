@@ -153,6 +153,8 @@ test_cases = [
         "path collapse 2",
     ),
     # TODO: subgraph.is_local(self.name)
+    # TODO: hint comments
+    # TODO: pinned
 ]
 
 
