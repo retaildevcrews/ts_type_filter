@@ -1,8 +1,8 @@
 # TODO
 
-* build_Filtered_types() should take list of text streams
+* x build_Filtered_types() should take list of text streams
 * Defaults
-* Hint/Comment parameter for types
+* x Hint/Comment parameter for types
 * Optional struct members
 * Should be able to mark members as default. They will never be filtered.
   * e.g. Regular

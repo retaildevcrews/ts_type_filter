@@ -134,18 +134,20 @@ class Array(Node):
 
 
 class Define(Node):
-    def __init__(self, name, params, type):
+    def __init__(self, name, params, type, hint=None):
         self.name = name
         self.params = params
         self.type = type
+        self.hint = hint
 
     def format(self):
+        hint = f"# {self.hint}\n" if self.hint else ""
         params = (
             f"<{",".join([p.format() for p in self.params])}>"
             if len(self.params or []) > 0
             else ""
         )
-        return f"type {self.name}{params}={self.type.format()};"
+        return f"{hint}type {self.name}{params}={self.type.format()};"
 
     def index(self, symbols, indexer):
         for param in self.params:
@@ -155,7 +157,7 @@ class Define(Node):
     def filter(self, subgraph):
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(isinstance(p, Never) for p in filtered_params):
-            return Define(self.name, filtered_params, Never())
+            return Define(self.name, filtered_params, Never(), self.hint)
 
         context = [p.name for p in self.params]
         if len(context) > 0:
@@ -169,8 +171,7 @@ class Define(Node):
 
         if len(context) > 0:
             subgraph.pop()
-        return Define(self.name, filtered_params, t)
-
+        return Define(self.name, filtered_params, t, self.hint)
     def visit(self, subgraph, visitor):
         visitor(self)
         for p in self.params:
