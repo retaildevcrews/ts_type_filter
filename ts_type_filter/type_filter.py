@@ -121,7 +121,10 @@ class Array(Node):
         self.type = type
 
     def format(self):
-        return self.type.format() + "[]"
+        if isinstance(self.type, Union):
+            return f"({self.type.format()})[]"
+        else:
+            return self.type.format() + "[]"
 
     def index(self, symbols, indexer):
         self.type.index(symbols, indexer)
@@ -174,6 +177,7 @@ class Define(Node):
         if len(context) > 0:
             subgraph.pop()
         return Define(self.name, filtered_params, t, self.hint)
+
     def visit(self, subgraph, visitor):
         visitor(self)
         for p in self.params:
@@ -282,8 +286,15 @@ class Struct(Node):
 
     def filter(self, subgraph):
         obj = {k: v.filter(subgraph) for k, v in self.obj.items()}
-        filtered = {k: v for k, v in obj.items() if not isinstance(v, Never)}
-        return Struct(filtered) if len(filtered) == len(obj) else Never()
+        requiredNevers = 0
+        filtered = {}
+        for k, v in obj.items():
+            if isinstance(v, Never):
+                if not k.endswith("?"):
+                    requiredNevers += 1
+            else:
+                filtered[k] = v
+        return Struct(filtered) if requiredNevers == 0 else Never()
 
     def visit(self, subgraph, visitor):
         visitor(self)
@@ -308,7 +319,9 @@ class Type(Node):
                 p.index(symbols, indexer)
 
     def filter(self, subgraph):
-        if not subgraph.is_local(self.name): # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
+        if not subgraph.is_local(
+            self.name
+        ):  # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
             # TODO: BUGBUG: isn't it possible to have two instances of the same generic with different type parameters?
             if self.params:
                 # type_parameters = [subgraph.process(x.name) for x in self.params]
@@ -391,7 +404,7 @@ def build_filtered_types(type_defs, symbols, indexer, text):
     subgraph = Subgraph(symbols, nodes)
     filtered = [n.filter(subgraph) for n in type_defs]
 
-    print("+++++++++++++++")
+    print("+++ Filtered Types ++++++++++++")
     for n in filtered:
         print(n.format())
     print("+++++++++++++++")
