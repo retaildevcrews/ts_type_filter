@@ -8,7 +8,7 @@
       "name": "menu",
       "type": "debugpy",
       "request": "launch",
-      "program": "private/menu.py",
+      "program": "samples/menu/menu.py",
       "console": "integratedTerminal",
       "args": [
         "fire",

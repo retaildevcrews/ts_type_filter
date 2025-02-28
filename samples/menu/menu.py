@@ -1,5 +1,6 @@
 import os
 import sys
+import tiktoken
 
 # Add the parent directory to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -23,7 +24,11 @@ type_defs = [
         [],
         Union(
             Type("WiseguyMeal", [ParamRef(Type("ComboSizes"))]),
+            Type("Meal", [ParamRef(Type("ComboSizes"))]),
             Type("PattyMelt"),
+            Type("Burger"),
+            Type("Chicken"),
+            Type("KoreanChicken"),
             Type(
                 "GenericFountainDrink",
                 [ParamRef(Type("DrinkNames")), ParamRef(Type("DrinkSizes"))],
@@ -60,10 +65,10 @@ type_defs = [
                 "size": Type("SIZE"),
                 "sandwich": Union(
                     Type("Wiseguy"),
-                    # Type("PattyMelt"),
-                    # Type("Burger"),
-                    # Type("Chicken"),
-                    # Type("KoreanChicken"),
+                    Type("PattyMelt"),
+                    Type("Burger"),
+                    Type("Chicken"),
+                    Type("KoreanChicken"),
                     # Type("Pitas"),
                     # Type("Fish"),
                     # Type("CHOOSE"),
@@ -122,10 +127,10 @@ type_defs = [
         Struct(
             {
                 "name": Union(
-                    Literal("Hero Melt"),
-                    Literal("Bacon Melt"),
-                    Literal("Mushroom and Swiss Melt"),
-                    Type("CHOOSE")
+                    Literal("Hero Melt", ["patty"]),
+                    Literal("Bacon Melt", ["patty"]),
+                    Literal("Mushroom and Swiss Melt", ["patty"]),
+                    Type("CHOOSE"),
                 ),
                 "options?": Array(
                     Union(
@@ -134,6 +139,99 @@ type_defs = [
                         Type("Cheeses"),
                         Type("Sauces"),
                         Type("Condiments"),
+                    )
+                ),
+            }
+        ),
+    ),
+    Define(
+        "Burger",
+        [],
+        Type(
+            "GenericBurger",
+            [
+                ParamRef(
+                    Union(
+                        Literal("Bacon Double Cheeseburger"),
+                        Literal("Bacon Cheeseburger"),
+                        Literal("Double Cheeseburger"),
+                        Literal("Cheeseburger"),
+                    )
+                )
+            ],
+        ),
+    ),
+    Define(
+        "GenericBurger",
+        [ParamDef("NAME")],
+        Struct(
+            {
+                "name": Type("NAME"),
+                "options?": Array(
+                    Union(
+                        Type("Veggies"),
+                        Type("Bacon"),
+                        Type("Cheeses"),
+                        Type("Sauces"),
+                        Type("Condiments"),
+                        Type("Preparations"),
+                        Type("Extras"),
+                    )
+                ),
+            }
+        ),
+    ),
+    Define(
+        "Chicken",
+        [],
+        Type(
+            "GenericChicken",
+            [
+                ParamRef(
+                    Union(
+                        Literal("Grilled Chicken Sandwich"),
+                        Literal("Cordon Bleu", ["chicken sandwich blue"]),
+                    )
+                )
+            ],
+        ),
+    ),
+    Define(
+        "GenericChicken",
+        [ParamDef("NAME")],
+        Struct(
+            {
+                "name": Type("NAME"),
+                "options?": Array(
+                    Union(
+                        Type("Veggies"),
+                        Type("Bacon"),
+                        Type("GenericCheese", [ParamRef(Literal("American Cheese"))]),
+                        Type("Condiments"),
+                    )
+                ),
+            }
+        ),
+    ),
+    Define(
+        "KoreanChicken",
+        [],
+        Struct(
+            {
+                "name": Union(
+                    Literal("Sweet and Spicy Chicken", ["Korean fried sandwich"]),
+                    Literal("Seasame Soy Chicken", ["Korean fried sandwich"]),
+                    Literal("Spicy Garlic Chicken", ["Korean fried sandwich"]),
+                ),
+                "options?": Array(
+                    Union(
+                        Type("Veggies"),
+                        Type("Bacon"),
+                        Type("Cheeses"),
+                        Type("Sauces"),
+                        Type("Condiments"),
+                        Type("Preparations"),
+                        Type("Extras"),
                     )
                 ),
             }
@@ -265,17 +363,54 @@ type_defs = [
             }
         ),
     ),
+    # Define(
+    #     "Cheeses",
+    #     [],
+    #     Struct(
+    #         {
+    #             "amount": Type("Optional"),
+    #             "name": Union(
+    #                 Literal("American Cheese"),
+    #                 Literal("Cheddar Cheese"),
+    #                 Literal("Swiss Cheese"),
+    #             ),
+    #         }
+    #     ),
+    # ),
+    # # TODO: make GenericCheese
+    # Define(
+    #     "AmericanCheese",
+    #     [],
+    #     Struct(
+    #         {
+    #             "amount": Type("Optional"),
+    #             "name": Literal("American Cheese"),
+    #         }
+    #     ),
+    # ),
     Define(
         "Cheeses",
         [],
+        Type(
+            "GenericCheese",
+            [
+                ParamRef(
+                    Union(
+                        Literal("American Cheese"),
+                        Literal("Cheddar Cheese"),
+                        Literal("Swiss Cheese"),
+                    )
+                )
+            ],
+        ),
+    ),
+    Define(
+        "GenericCheese",
+        [ParamDef("NAME")],
         Struct(
             {
+                "name": Type("NAME"),
                 "amount": Type("Optional"),
-                "name": Union(
-                    Literal("American Cheese"),
-                    Literal("Cheddar Cheese"),
-                    Literal("Swiss Cheese"),
-                ),
             }
         ),
     ),
@@ -318,6 +453,31 @@ type_defs = [
         ),
     ),
     Define(
+        "Extras",
+        [],
+        Struct(
+            {
+                "amount": Type("ExtraAmount"),
+                "name": Union(Literal("Onion Rings"), Literal("Jalopenos")),
+            }
+        ),
+    ),
+    Define(
+        "Preparations",
+        [],
+        Struct(
+            {
+                "amount": Type("Optional"),
+                "name": Union(
+                    Literal("Off Broiler"),
+                    Literal("Cut in Half"),
+                    Literal("Plain"),
+                    Literal("Low Carb"),
+                ),
+            }
+        ),
+    ),
+    Define(
         "Amounts",
         [],
         Union(Type("Amount"), Type("ExtraAmount"), Type("Optional")),
@@ -346,36 +506,28 @@ type_defs = [
 
 
 def format_menu(type_defs):
-    text = "\n".join([x.format() for x in type_defs])
-    return text, len(text)
+    return "\n".join([x.format() for x in type_defs])
 
 
 def go():
+    encoder = tiktoken.get_encoding("cl100k_base")
+
     if len(sys.argv) <= 1:
         print("Using default query because no query was specified on the command line.")
     default_query = "mushroom melt with extra mayo and no tomatoes"
     query = sys.argv[1] if len(sys.argv) > 1 else default_query
-        
+
     #
     # Print out original type definition
     #
-    original, original_len = format_menu(type_defs)
+    original = format_menu(type_defs)
+    original_tokens = len(encoder.encode(original))
     print(original)
 
     #
     # Print out filtered type definition
     #
     print("=== Filtered Types =====================")
-
-    # "Wiseguy Regular Small", # ok
-    # "Wiseguy Small", # never
-    # "Wiseguy Regular", # never
-    # "Choose vegan", # ERROR: gives all wiseguy types
-    # "Choose vegan"
-    # "wiseguy regular", # FIXED: BUG: WiseguyMeal<> becomes just never
-    # query = "choose meal regular"
-    # query = "small wiseguy with no lettuce french fries and a cola"
-    # query = "mushroom melt with extra mayo and no tomatoes"
 
     symbols, indexer = build_type_index(type_defs)
     reachable = build_filtered_types(type_defs, symbols, indexer, query)
@@ -385,13 +537,17 @@ def go():
 
     print()
     print("!!! Pruned Types!!!!!!!!!!!!!!!!")
-    pruned, pruned_len = format_menu(reachable)
+    pruned = format_menu(reachable)
+    pruned_tokens = len(encoder.encode(pruned))
     print(pruned)
 
     print()
     print(f"query: {query}")
-    print(f"original: {original_len}")
-    print(f"pruned: {pruned_len}")
+    print(f"tokens (original): {original_tokens}")
+    print(f"tokens (pruned): {pruned_tokens}")
+    pruned_percentage = (pruned_tokens / original_tokens) * 100
+    print(f"percentage pruned: {pruned_percentage:.2f}%")
 
 
-go()
+if __name__ == "__main__":
+    go()

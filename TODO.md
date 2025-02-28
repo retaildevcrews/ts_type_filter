@@ -46,3 +46,7 @@ becomes
 
 type Cart={items:Item[]};
 type Item={q1:"v"};
+
+Another path compression: double cheeseburger meal cut in half
+type Preparations={amount:Optional,name:"Cut in Half"};
+type Optional="regular";
