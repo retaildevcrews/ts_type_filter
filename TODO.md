@@ -1,5 +1,9 @@
 # TODO
 
+* Hint<TYPE, TEXT>, PIN<TYPE>, ALIAS<TYPE>
+* Public and private variables in classes - consistent usage, accessors.
+* Typecheck arity and type of generic type parameters. Example
+  * Include GenericTest in Items without providing type parameters
 * x build_Filtered_types() should take list of text streams
 * x Pinned nodes / defaults
 * x Hint/Comment parameter for types

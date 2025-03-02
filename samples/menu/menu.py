@@ -23,6 +23,8 @@ type_defs = [
         "Item",
         [],
         Union(
+            Type("GenericTest"),
+            Type("FrenchFries2", [ParamRef(Literal("Onion Rings", [], True)), ParamRef(Literal("Value", [], True))]),
             Type("WiseguyMeal", [ParamRef(Type("ComboSizes"))]),
             Type("Meal", [ParamRef(Type("ComboSizes"))]),
             Type("PattyMelt"),
@@ -31,10 +33,32 @@ type_defs = [
             Type("KoreanChicken"),
             Type("Pitas"),
             Type("Fish"),
+            Type("ComboTwo"),
+            Type("ComboThree"),
+            Type("FrenchFries", [ParamRef(Type("FrenchFrySizes"))]),
             Type(
                 "GenericFountainDrink",
                 [ParamRef(Type("DrinkNames")), ParamRef(Type("DrinkSizes"))],
             ),
+        ),
+    ),
+    Define(
+        "GenericTest",
+        [ParamDef("NAME"), ParamDef("SIZE")],
+        Struct({"name": Type("NAME"), "size": Type("SIZE")}),
+    ),
+    Define(
+        "GenericNameSize",
+        [ParamDef("NAME"), ParamDef("SIZE"), ParamDef("OPTIONS")],
+        Struct(
+            {"name": Type("NAME"), "size": Type("SIZE"), "options?": Type("OPTIONS")}
+        ),
+    ),
+    Define(
+        "GenericNameSizeOptions",
+        [ParamDef("NAME"), ParamDef("SIZE"), ParamDef("OPTIONS")],
+        Struct(
+            {"name": Type("NAME"), "size": Type("SIZE"), "options?": Type("OPTIONS")}
         ),
     ),
     Define(
@@ -78,6 +102,8 @@ type_defs = [
                 "fries": Union(
                     Type("FrenchFries", [ParamRef(Type("SIZE"))]), Type("CHOOSE")
                 ),
+                # The next line represents a bottom up case where GenericFountainDrink
+                # should be pruned if all DrinkNames are pruned.
                 "drink": Union(
                     Type(
                         "GenericFountainDrink",
@@ -86,6 +112,71 @@ type_defs = [
                     Type("CHOOSE"),
                 ),
             }
+        ),
+    ),
+    Define(
+        "ComboTwo",
+        [],
+        Struct(
+            {
+                "name": Literal("Twofer Combo", ["pick choose two combination meal"]),
+                "one": Type("TwoThreeChoices"),
+                "two": Type("TwoThreeChoices"),
+            }
+        ),
+    ),
+    Define(
+        "ComboThree",
+        [],
+        Struct(
+            {
+                "name": Literal(
+                    "Threefer Combo", ["pick choose three combination meal"]
+                ),
+                "one": Type("TwoThreeChoices"),
+                "two": Type("TwoThreeChoices"),
+                "three": Type("TwoThreeChoices"),
+            }
+        ),
+    ),
+    Define(
+        "TwoThreeChoices",
+        [],
+        Union(
+            Type("Wiseguy"),
+            Type("GenericChicken", [ParamRef(Literal("Grilled Chicken Sandwich"))]),
+            Type(
+                "GenericBurger",
+                [ParamRef(Literal("Bacon Cheeseburger", ["burger"], False))],
+            ),
+            # The next like mentions a specific FrenchFry size and should remain
+            # in the tree if FrenchFries isn't pruned.
+            Type("FrenchFries", [ParamRef(Literal("Medium", [], True))]),
+            Type(
+                "GenericOtherFries",
+                [
+                    ParamRef(Literal("Jalapeno Popper", [], True)),
+                    ParamRef(Literal("8 Piece", [], True)),
+                ],
+            ),
+            # TODO:BUGBUG: experiment including next line
+            Type("OtherFries", [ParamRef(Literal("8 Piece", [], True))]),
+            Type(
+                "GenericFountainDrink",
+                [
+                    ParamRef(
+                        Union(
+                            # TODO: duplicated aliases here.
+                            Literal("Coca-Cola", ["coca", "cola", "coke"]),
+                            Literal("Diet Coke", ["coca", "cola", "coke"]),
+                            Literal("Dr. Pepper", ["doctor"]),
+                            Literal("Sprite"),
+                        )
+                    ),
+                    ParamRef(Literal("Medium", [], True)),
+                ],
+            ),
+            Type("CHOOSE"),
         ),
     ),
     Define(
@@ -132,7 +223,7 @@ type_defs = [
                     Literal("Hero Melt", ["patty"]),
                     Literal("Bacon Melt", ["patty"]),
                     Literal("Mushroom and Swiss Melt", ["patty"]),
-                    Type("CHOOSE"),
+                    # Type("CHOOSE"),
                 ),
                 "options?": Array(
                     Union(
@@ -285,26 +376,40 @@ type_defs = [
     ),
     Define(
         "FrenchFries",
-        [ParamDef("SIZE", Type("ComboSizes"))],
+        [ParamDef("SIZE")],
         Struct(
             {
                 "name": Union(
                     Literal("French Fries"),
                     Literal("Onion Rings"),
                     Literal("Sweet Potato Fries"),
+                    Type("CHOOSE"),
                 ),
                 "size": Type("SIZE"),
             }
         ),
     ),
     Define(
-        "FrenchFrySize",
-        [],
-        Union(Literal("Value"), Literal("Small"), Literal("Medium"), Literal("Large")),
-    ),
-    Define(
-        "GenericFrenchFries",
-        [ParamDef("NAME"), ParamDef("SIZE", Type("FrenchFrySize"))],
+        "FrenchFries2",
+        [
+            ParamDef(
+                "NAME",
+                Union(
+                    Literal("French Fries"),
+                    Literal("Onion Rings"),
+                    Literal("Sweet Potato Fries"),
+                ),
+            ),
+            ParamDef(
+                "SIZE",
+                Union(
+                    Literal("Value"),
+                    Literal("Small"),
+                    Literal("Medium"),
+                    Literal("Large"),
+                ),
+            ),
+        ],
         Struct(
             {
                 "name": Type("NAME"),
@@ -312,6 +417,28 @@ type_defs = [
             }
         ),
     ),
+    Define(
+        "FrenchFrySizes",
+        [],
+        Union(
+            Literal("Value"),
+            Literal("Small"),
+            Literal("Medium"),
+            Literal("Large"),
+            Type("CHOOSE"),
+        ),
+    ),
+    # Do we need GenericFrenchFries? Does it need to be pinned?
+    # Define(
+    #     "GenericFrenchFries",
+    #     [ParamDef("NAME"), ParamDef("SIZE", Type("FrenchFrySizes"))],
+    #     Struct(
+    #         {
+    #             "name": Type("NAME"),
+    #             "size": Type("SIZE"),
+    #         }
+    #     ),
+    # ),
     Define(
         "OtherFries",
         [ParamDef("SIZE", Type("OtherFriesSizes"))],
@@ -322,10 +449,13 @@ type_defs = [
                     Literal("Mozzarella Sticks"),
                 ),
                 "size": Type("SIZE"),
-                "sauce": Type("DippingSauceFlavor"),
+                # "sauce": Type("DippingSauceFlavor"),
             }
         ),
     ),
+    # TODO: BUGBUG: when commented out, why doesn't this raise an exception for the dangling reference
+    # from TwoThreeChoices? Traversal never gets there because it aborts on type parameters.
+    # Do we need GenericOtherFries?
     Define(
         "GenericOtherFries",
         [ParamDef("NAME"), ParamDef("SIZE", Type("OtherFriesSizes"))],
@@ -333,7 +463,7 @@ type_defs = [
             {
                 "name": Type("NAME"),
                 "size": Type("SIZE"),
-                "sauce": Type("DippingSauceFlavor"),
+                # "sauce": Type("DippingSauceFlavor"),
             }
         ),
     ),
@@ -357,11 +487,7 @@ type_defs = [
         "GenericFountainDrink",
         [ParamDef("NAME", Type("DrinkNames")), ParamDef("SIZE", Type("DrinkSizes"))],
         Struct(
-            {
-                "name": Type("NAME"),
-                "size": Type("SIZE"),
-                "options?": Array(Type("Ice"))
-            }
+            {"name": Type("NAME"), "size": Type("SIZE"), "options?": Array(Type("Ice"))}
         ),
     ),
     Define(
@@ -501,7 +627,6 @@ type_defs = [
             {
                 "amount": Type("Optional"),
                 "name": Union(
-                    Literal("Off Broiler"),
                     Literal("Cut in Half"),
                     Literal("Plain"),
                     Literal("Low Carb"),
@@ -559,16 +684,16 @@ def go():
     #
     # Print out filtered type definition
     #
-    print("=== Filtered Types =====================")
+    print("=== Reachable Types ===")
 
     symbols, indexer = build_type_index(type_defs)
     reachable = build_filtered_types(type_defs, symbols, indexer, query)
 
-    for n in reachable:
-        print(n.format())
+    # for n in reachable:
+    #     print(n.format())
 
     print()
-    print("!!! Pruned Types!!!!!!!!!!!!!!!!")
+    print("=== Pruned Types ===")
     pruned = format_menu(reachable)
     pruned_tokens = len(encoder.encode(pruned))
     print(pruned)

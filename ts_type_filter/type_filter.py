@@ -21,6 +21,9 @@ class TypeIndex:
 
     def add(self, node):
         self._index.add(node)
+        # TODO: BUGBUG: why doesn't this if-statement raise an exception
+        # when node doesn't have a pinned attribute?
+        # I think the answer is only Literal.index() calls this method.
         if node.pinned:
             self._index.pin(node)
 
@@ -160,6 +163,8 @@ class Define(Node):
         self.type.index(symbols, indexer)
 
     def filter(self, subgraph):
+        if (self.name == "TwoThreeChoices"):
+            print("define 456")
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(isinstance(p, Never) for p in filtered_params):
             return Define(self.name, filtered_params, Never(), self.hint)
@@ -319,6 +324,8 @@ class Type(Node):
                 p.index(symbols, indexer)
 
     def filter(self, subgraph):
+        if (self.name == "TwoThreeChoices"):
+            print("type 123")
         if not subgraph.is_local(
             self.name
         ):  # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
@@ -326,6 +333,13 @@ class Type(Node):
             if self.params:
                 # type_parameters = [subgraph.process(x.name) for x in self.params]
                 type_parameters = [x.filter(subgraph) for x in self.params]
+                # TODO: BUGBUG: query="choose two coke fries" fails because FrenchFries<Medium> in TwoThreeChoices becomes Never.
+                # QUESTION: should we be filtering on type parameters?
+                # Don't wanter filter FrenchFries<Medium> to from TwoThreeChoices but do want to
+                # filter GenericCheese from Cheeses. First example flows down. Second example
+                # flows up.
+                # Tried only filtering if 2 or more type parameters. Problem is there are both cases with one param.
+                # TEMPORARY comment out below
                 if any(
                     (isinstance(param, Define) and isinstance(param.type, Never))
                     or isinstance(param, Never)
@@ -402,8 +416,15 @@ def build_filtered_types(type_defs, symbols, indexer, text):
     # Filter the graph based on search terms
     nodes = indexer.nodes(text)
     subgraph = Subgraph(symbols, nodes)
-    filtered = [n.filter(subgraph) for n in type_defs]
 
+    filtered = []
+    for i, n in enumerate(type_defs):
+        f = n.filter(subgraph)
+        filtered.append(f)
+        print(f"{i}:\n  {n.format()}\n  {f.format()}")
+    # filtered = [n.filter(subgraph) for n in type_defs]
+
+    print() 
     print("+++ Filtered Types ++++++++++++")
     for n in filtered:
         print(n.format())

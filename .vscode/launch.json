@@ -11,7 +11,7 @@
       "program": "samples/menu/menu.py",
       "console": "integratedTerminal",
       "args": [
-        "fire",
+        "choose two coke fries",
       ]
     },
     {
