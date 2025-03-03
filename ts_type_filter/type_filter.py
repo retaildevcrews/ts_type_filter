@@ -166,7 +166,7 @@ class Define(Node):
         if (self.name == "TwoThreeChoices"):
             print("define 456")
         filtered_params = [p.filter(subgraph) for p in self.params]
-        if any(isinstance(p, Never) for p in filtered_params):
+        if any(p.extends and isinstance(p.extends, Never) for p in filtered_params):
             return Define(self.name, filtered_params, Never(), self.hint)
 
         context = [p.name for p in self.params]
@@ -244,7 +244,7 @@ class ParamDef(Node):
         if self.extends:
             t = self.extends.filter(nodes)
             if isinstance(t, Never):
-                return Never()
+                return ParamDef(self.name, Never())
             return ParamDef(self.name, t)
         return self
 

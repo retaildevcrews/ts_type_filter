@@ -24,7 +24,13 @@ type_defs = [
         [],
         Union(
             Type("GenericTest"),
-            Type("FrenchFries2", [ParamRef(Literal("Onion Rings", [], True)), ParamRef(Literal("Value", [], True))]),
+            Type(
+                "FrenchFries2",
+                [
+                    ParamRef(Literal("Onion Rings", [], True)),
+                    ParamRef(Literal("Value", [], True)),
+                ],
+            ),
             Type("WiseguyMeal", [ParamRef(Type("ComboSizes"))]),
             Type("Meal", [ParamRef(Type("ComboSizes"))]),
             Type("PattyMelt"),
@@ -48,11 +54,37 @@ type_defs = [
         Struct({"name": Type("NAME"), "size": Type("SIZE")}),
     ),
     Define(
-        "GenericNameSize",
-        [ParamDef("NAME"), ParamDef("SIZE"), ParamDef("OPTIONS")],
+        "FrenchFries2",
+        [
+            ParamDef(
+                "NAME",
+                Union(
+                    Literal("French Fries"),
+                    Literal("Onion Rings"),
+                    Literal("Sweet Potato Fries"),
+                ),
+            ),
+            ParamDef(
+                "SIZE",
+                Union(
+                    Literal("Value"),
+                    Literal("Small"),
+                    Literal("Medium"),
+                    Literal("Large"),
+                ),
+            ),
+        ],
         Struct(
-            {"name": Type("NAME"), "size": Type("SIZE"), "options?": Type("OPTIONS")}
+            {
+                "name": Type("NAME"),
+                "size": Type("SIZE"),
+            }
         ),
+    ),
+    Define(
+        "GenericNameSize",
+        [ParamDef("NAME"), ParamDef("SIZE")],
+        Struct({"name": Type("NAME"), "size": Type("SIZE")}),
     ),
     Define(
         "GenericNameSizeOptions",
@@ -119,7 +151,9 @@ type_defs = [
         [],
         Struct(
             {
-                "name": Literal("Twofer Combo", ["pick choose two combination meal"]),
+                "name": Literal(
+                    "Twofer Combo", ["pick choose two combination meal deal"]
+                ),
                 "one": Type("TwoThreeChoices"),
                 "two": Type("TwoThreeChoices"),
             }
@@ -131,7 +165,7 @@ type_defs = [
         Struct(
             {
                 "name": Literal(
-                    "Threefer Combo", ["pick choose three combination meal"]
+                    "Threefer Combo", ["pick choose three combination meal deal"]
                 ),
                 "one": Type("TwoThreeChoices"),
                 "two": Type("TwoThreeChoices"),
@@ -156,11 +190,11 @@ type_defs = [
                 "GenericOtherFries",
                 [
                     ParamRef(Literal("Jalapeno Popper", [], True)),
-                    ParamRef(Literal("8 Piece", [], True)),
+                    ParamRef(Literal("6 Piece", [], True)),
                 ],
             ),
             # TODO:BUGBUG: experiment including next line
-            Type("OtherFries", [ParamRef(Literal("8 Piece", [], True))]),
+            # Type("OtherFries", [ParamRef(Literal("8 Piece", [], True))]),
             Type(
                 "GenericFountainDrink",
                 [
@@ -376,43 +410,15 @@ type_defs = [
     ),
     Define(
         "FrenchFries",
-        [ParamDef("SIZE")],
+        [ParamDef("SIZE", Type("FrenchFrySizes"))],
         Struct(
             {
                 "name": Union(
                     Literal("French Fries"),
                     Literal("Onion Rings"),
                     Literal("Sweet Potato Fries"),
-                    Type("CHOOSE"),
+                    # Type("CHOOSE"),
                 ),
-                "size": Type("SIZE"),
-            }
-        ),
-    ),
-    Define(
-        "FrenchFries2",
-        [
-            ParamDef(
-                "NAME",
-                Union(
-                    Literal("French Fries"),
-                    Literal("Onion Rings"),
-                    Literal("Sweet Potato Fries"),
-                ),
-            ),
-            ParamDef(
-                "SIZE",
-                Union(
-                    Literal("Value"),
-                    Literal("Small"),
-                    Literal("Medium"),
-                    Literal("Large"),
-                ),
-            ),
-        ],
-        Struct(
-            {
-                "name": Type("NAME"),
                 "size": Type("SIZE"),
             }
         ),
@@ -439,26 +445,35 @@ type_defs = [
     #         }
     #     ),
     # ),
-    Define(
-        "OtherFries",
-        [ParamDef("SIZE", Type("OtherFriesSizes"))],
-        Struct(
-            {
-                "name": Union(
-                    Literal("Jalapeno Poppers"),
-                    Literal("Mozzarella Sticks"),
-                ),
-                "size": Type("SIZE"),
-                # "sauce": Type("DippingSauceFlavor"),
-            }
-        ),
-    ),
+    # Define(
+    #     "OtherFries",
+    #     [ParamDef("SIZE", Type("OtherFriesSizes"))],
+    #     Struct(
+    #         {
+    #             "name": Union(
+    #                 Literal("Jalapeno Poppers"),
+    #                 Literal("Mozzarella Sticks"),
+    #             ),
+    #             "size": Type("SIZE"),
+    #             # "sauce": Type("DippingSauceFlavor"),
+    #         }
+    #     ),
+    # ),
     # TODO: BUGBUG: when commented out, why doesn't this raise an exception for the dangling reference
     # from TwoThreeChoices? Traversal never gets there because it aborts on type parameters.
     # Do we need GenericOtherFries?
     Define(
         "GenericOtherFries",
-        [ParamDef("NAME"), ParamDef("SIZE", Type("OtherFriesSizes"))],
+        [
+            ParamDef(
+                "NAME",
+                Union(
+                    Literal("Jalapeno Poppers"),
+                    Literal("Mozzarella Sticks"),
+                ),
+            ),
+            ParamDef("SIZE", Type("OtherFriesSizes")),
+        ],
         Struct(
             {
                 "name": Type("NAME"),
@@ -470,7 +485,7 @@ type_defs = [
     Define(
         "OtherFriesSizes",
         [],
-        Union(Literal("4 Piece"), Literal("8 Piece"), Literal("12 Piece")),
+        Union(Literal("6 Piece"), Literal("12 Piece"), Type("CHOOSE"))
     ),
     Define(
         "ComboSizes",

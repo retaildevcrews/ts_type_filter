@@ -158,3 +158,85 @@ type GenericOtherFries<NAME, SIZE extends OtherFriesSizes> = {
   size: SIZE;
 };
 ~~~
+
+## Menu Design Notes
+
+### Use of pinned types
+
+It is often useful to define a type to denote a choice that must be made.
+In the following we use the type `CHOOSE` for this purpose.
+Note that the type literal `"CHOOSE"` has been pinned so that it will never be pruned.
+Since `"CHOOSE"` is pinned, it won't interfere with queries containing the term `"choose"`.
+These queries will never filter the pinned type and they will never filter other
+types that match `"choose"`.
+
+In the definition of type `FrenchFries`, we don't include `CHOOSE` in the `name` union
+because we want use the name field to control pruning.
+
+~~~python
+    Define(
+        "FrenchFries",
+        [ParamDef("SIZE", Type("FrenchFrySizes"))],
+        Struct(
+            {
+                "name": Union(
+                    Literal("French Fries"),
+                    Literal("Onion Rings"),
+                    Literal("Sweet Potato Fries"),
+                    # Here CHOOSE is not required because
+                    # the type FrenchFries has no field
+                    # field specific to unnamed french fries.
+                    # Type("CHOOSE"),
+                ),
+                "size": Type("SIZE"),
+            }
+        ),
+    ),
+    Define(
+        "FrenchFrySizes",
+        [],
+        Union(
+            Literal("Value"),
+            Literal("Small"),
+            Literal("Medium"),
+            Literal("Large"),
+            # Here CHOOSE is appropriate since it is reasonalbe
+            # for one to reason about FrenchFries without
+            # choosing a size.
+            Type("CHOOSE"),
+        ),
+    ),
+    Define(
+        "CHOOSE",
+        [],
+        Literal("CHOOSE", [], True),
+        "Use CHOOSE when customer doesn't specify an option",
+    ),
+~~~
+
+The rationale for not including `CHOOSE` in the name `union` is that there is no
+circumstance where we would want
+
+~~~typescript
+{
+  name: CHOOSE;
+  size: CHOOSE;
+}
+~~~
+
+Contrast this with a case where the query terms select a class with a choice:
+
+~~~typescript
+type Cheese = {
+  name: "cheese";
+  type: "American" | "Cheddar" | CHOOSE;
+}
+~~~
+
+Here is is totally reasonable to create an unspecified `Cheese`:
+
+~~~typescript
+{
+  name: "cheese";
+  type: CHOOSE;
+}

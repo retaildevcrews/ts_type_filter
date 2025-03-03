@@ -1,5 +1,6 @@
 # TODO
 
+* DippingSauceFlavor
 * Hint<TYPE, TEXT>, PIN<TYPE>, ALIAS<TYPE>
 * Public and private variables in classes - consistent usage, accessors.
 * Typecheck arity and type of generic type parameters. Example
