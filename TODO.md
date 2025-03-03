@@ -1,5 +1,7 @@
 # TODO
 
+* POTENTIAL BUG
+  * "twofer combo with root beer will filter out drink choices because root beer is not allowed
 * DippingSauceFlavor
 * Hint<TYPE, TEXT>, PIN<TYPE>, ALIAS<TYPE>
 * Public and private variables in classes - consistent usage, accessors.

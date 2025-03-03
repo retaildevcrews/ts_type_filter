@@ -1,5 +1,6 @@
 from .inverted_index import Index
 from .type_filter import (
+    Any,
     Array,
     build_filtered_types,
     build_type_index,
@@ -15,6 +16,7 @@ from .type_filter import (
 )
 
 __all__ = [
+    "Any",
     "Array",
     "build_filtered_types",
     "build_type_index",

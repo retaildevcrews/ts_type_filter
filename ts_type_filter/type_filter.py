@@ -119,6 +119,25 @@ class Node(ABC):
         pass
 
 
+class AnyNode(Node):
+    def __init__(self):
+        pass
+
+    def format(self):
+        return "any"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+Any = AnyNode()
+
 class Array(Node):
     def __init__(self, type):
         self.type = type
@@ -149,7 +168,7 @@ class Define(Node):
         self.hint = hint
 
     def format(self):
-        hint = f"# {self.hint}\n" if self.hint else ""
+        hint = f"// {self.hint}\n" if self.hint else ""
         params = (
             f"<{",".join([p.format() for p in self.params])}>"
             if len(self.params or []) > 0
