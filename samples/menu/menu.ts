@@ -220,11 +220,11 @@ type Preparations = {
 
 type Amounts = Amount | ExtraAmount | Optional;
 
-type Amount = "no" | "light" | "regular" | "extra";
+type Amount = "No" | "Light" | "Regular" | "Extra";
 
-type ExtraAmount = "no" | "regular" | "extra";
+type ExtraAmount = "No" | "Regular" | "extra";
 
-type Optional = "no" | "regular";
+type Optional = "No" | "Regular";
 
 // Use CHOOSE when customer doesn't specify an option
 type CHOOSE = "CHOOSE";
