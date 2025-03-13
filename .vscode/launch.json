@@ -5,6 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "ordering",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "samples/menu/ordering.py",
+      "console": "integratedTerminal",
+      "args": [
+        "format",
+        "9bfc"
+      ]
+    },
+    {
       "name": "menu",
       "type": "debugpy",
       "request": "launch",

@@ -159,15 +159,19 @@ class MenuPipeline(Pipeline):
 
         # Create the system and user messages
         async def prepare(context):
+            # Prune the menu based on terms in the query and the cart
             user_query = context["case"]["turns"][-1]["query"]
-            cart_terms = collect_string_literals(
-                context["case"]["turns"][-1]["expected"]
+            cart = (
+                context["case"]["turns"][-2]["expected"]
+                if len(context["case"]["turns"]) > 1
+                else {}
             )
-            query = user_query + " " + " ".join(cart_terms)
-            reachable = build_filtered_types(type_defs, symbols, indexer, query)
+            cart_literals = collect_string_literals(cart)
+            full_query = [user_query] + cart_literals
+            reachable = build_filtered_types(type_defs, symbols, indexer, full_query)
             pruned = (
                 format_menu(reachable)
-                if str(self.config()["prepare"]["prune"])=="True"
+                if str(self.config()["prepare"]["prune"]) == "True"
                 else format_menu(type_defs)
             )
 
@@ -186,11 +190,15 @@ class MenuPipeline(Pipeline):
                 )
             messages.append({"role": "user", "content": case["turns"][-1]["query"]})
 
-            return messages
+            return {
+                "messages": messages,
+                "full_query": full_query,
+            }
+            # return messages
 
         # Invoke the model to generate a response
         async def infer(context):
-            return await model.infer(context["stages"]["prepare"], context)
+            return await model.infer(context["stages"]["prepare"]["messages"], context)
 
         # Attempt to extract a JSON shopping cart from the model response.
         # Note that this method will raise an exception if the response is not
@@ -340,9 +348,11 @@ class MenuPipeline(Pipeline):
                     # print(result["case"]["comment"])
                     print()
 
+                    print(f"Keywords: {', '.join(result['case'].get('keywords', []))}  ")
+
                     input_tokens = sum(
                         len(self._tokenizer.encode(message["content"]))
-                        for message in result["stages"]["prepare"]
+                        for message in result["stages"]["prepare"]["messages"]
                     )
                     print(f"Complete menu tokens: {complete_tokens}  ")
                     print(
@@ -350,7 +360,7 @@ class MenuPipeline(Pipeline):
                     )
                     print()
 
-                    for x in result["stages"]["prepare"]:
+                    for x in result["stages"]["prepare"]["messages"]:
                         if x["role"] == "assistant" or x["role"] == "system":
                             print(f"**{x['role']}:**")
                             print("```json")
@@ -371,6 +381,12 @@ class MenuPipeline(Pipeline):
                             print(f"* {step}")
                     else:
                         print("**No repairs**")
+
+                    print()
+                    print("**Full query**:")
+                    for x in result["stages"]["prepare"]["full_query"]:
+                        print(f"* {x}")
+                    print()
 
                 else:
                     print("**ERROR**  ")

@@ -29,7 +29,7 @@
   {
     "uuid": "c47c6a7c-d819-4d71-a87b-a5c85ba5f765",
     "keywords": [
-      "single-turn",
+      "multi-turn",
       "combo",
       "p1"
     ],
@@ -85,20 +85,20 @@
         "query": "i want a a grilled chicken and a fish burger and two cokes",
         "expected": {
           "items": [
-              {
-                "name": "Grilled Chicken Sandwich"
-              },
-              {
-                "name": "Captain Nemo Burger"
-              },
-              {
-                "name": "Coca-Cola",
-                "size": "CHOOSE"
-              },
-              {
-                "name": "Coca-Cola",
-                "size": "CHOOSE"
-              }
+            {
+              "name": "Grilled Chicken Sandwich"
+            },
+            {
+              "name": "Captain Nemo Burger"
+            },
+            {
+              "name": "Coca-Cola",
+              "size": "CHOOSE"
+            },
+            {
+              "name": "Coca-Cola",
+              "size": "CHOOSE"
+            }
           ]
         }
       }

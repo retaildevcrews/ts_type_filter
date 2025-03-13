@@ -470,7 +470,7 @@ def collect_string_literals(data):
     Returns:
       list: A list of all string literal values found in the dictionary.
     """
-    literals = []
+    literals = set()
 
     def _collect(data):
         if isinstance(data, dict):
@@ -480,7 +480,7 @@ def collect_string_literals(data):
             for item in data:
                 _collect(item)
         elif isinstance(data, str):
-            literals.append(data)
+            literals.add(data)
 
     _collect(data)
-    return literals
+    return [x for x in literals]
