@@ -573,21 +573,21 @@ type_defs = [
         "Amount",
         [],
         Union(
-            Literal("no"),
-            Literal("light"),
-            Literal("regular", [], True),
-            Literal("extra"),
+            Literal("No"),
+            Literal("Light"),
+            Literal("Regular", [], True),
+            Literal("Extra"),
         ),
     ),
     Define(
         "ExtraAmount",
         [],
-        Union(Literal("no"), Literal("regular", [], True), Literal("extra")),
+        Union(Literal("No"), Literal("Regular", [], True), Literal("extra")),
     ),
     Define(
         "Optional",
         [],
-        Union(Literal("no"), Literal("regular", [], True)),
+        Union(Literal("No"), Literal("Regular", [], True)),
     ),
     Define(
         "CHOOSE",

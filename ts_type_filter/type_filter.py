@@ -182,8 +182,8 @@ class Define(Node):
         self.type.index(symbols, indexer)
 
     def filter(self, subgraph):
-        if (self.name == "TwoThreeChoices"):
-            print("define 456")
+        # if (self.name == "TwoThreeChoices"):
+        #     print("define 456")
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(p.extends and isinstance(p.extends, Never) for p in filtered_params):
             return Define(self.name, filtered_params, Never(), self.hint)
@@ -343,8 +343,8 @@ class Type(Node):
                 p.index(symbols, indexer)
 
     def filter(self, subgraph):
-        if (self.name == "TwoThreeChoices"):
-            print("type 123")
+        # if (self.name == "TwoThreeChoices"):
+        #     print("type 123")
         if not subgraph.is_local(
             self.name
         ):  # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
@@ -440,14 +440,14 @@ def build_filtered_types(type_defs, symbols, indexer, text):
     for i, n in enumerate(type_defs):
         f = n.filter(subgraph)
         filtered.append(f)
-        print(f"{i}:\n  {n.format()}\n  {f.format()}")
+        # print(f"{i}:\n  {n.format()}\n  {f.format()}")
     # filtered = [n.filter(subgraph) for n in type_defs]
 
-    print() 
-    print("+++ Filtered Types ++++++++++++")
-    for n in filtered:
-        print(n.format())
-    print("+++++++++++++++")
+    # print() 
+    # print("+++ Filtered Types ++++++++++++")
+    # for n in filtered:
+    #     print(n.format())
+    # print("+++++++++++++++")
 
     # Collect nodes reachable from the root
     reachable = OrderedDict()

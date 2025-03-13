@@ -1,5 +1,11 @@
 # TODO
 
+Top
+* x Consistent capitalization in amounts
+* Encapsulate pruning code in convenience function
+* Modify index to take array of text
+* Formatter show extracted text
+
 * POTENTIAL BUG
   * "twofer combo with root beer will filter out drink choices because root beer is not allowed
 * DippingSauceFlavor

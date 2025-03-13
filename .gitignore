@@ -177,3 +177,8 @@ cython_debug/
 junk
 junk.py
 private
+
+# GoTaglio files
+models.json
+.credentials.json
+logs
