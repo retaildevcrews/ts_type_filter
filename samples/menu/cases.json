@@ -105,6 +105,7 @@
     ]
   },
   {
+    "uuid": "adf6d0b5-e06c-4f33-a735-338918f10f51",
     "keywords": [
       "multi-turn",
       "edit",
@@ -160,7 +161,21 @@
           ]
         }
       }
-    ],
-    "uuid": "adf6d0b5-e06c-4f33-a735-338918f10f51"
+    ]
+  },
+  {
+    "turns": [
+      {
+        "query": "can I a double wiseguy with no tomatoes and extra mayo",
+        "expected": {
+          "items": [
+            {
+              "name": "Double Wiseguy",
+              "type": "CHOOSE"
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

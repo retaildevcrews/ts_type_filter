@@ -26,6 +26,7 @@ type_defs = [
         Union(
             Type("WiseguyMeal", [ParamRef(Type("ComboSizes"))]),
             Type("Meal", [ParamRef(Type("ComboSizes"))]),
+            Type("Wiseguy"),
             Type("PattyMelt"),
             Type("Burger"),
             Type("Chicken"),
