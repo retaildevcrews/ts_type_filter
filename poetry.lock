@@ -346,6 +346,7 @@ azure-ai-inference = ">=1.0.0b7,<2.0.0"
 gitpython = ">=3.1.44,<4.0.0"
 glom = ">=24.11.0,<25.0.0"
 jinja2 = ">=3.1.5,<4.0.0"
+nest-asyncio = ">=1.6.0,<2.0.0"
 numpy = ">=2.2.1,<3.0.0"
 openai = ">=1.59.7,<2.0.0"
 pyparsing = ">=3.2.1,<4.0.0"
@@ -357,7 +358,7 @@ tiktoken = ">=0.9.0,<0.10.0"
 type = "git"
 url = "https://github.com/MikeHopcroft/gotaglio"
 reference = "HEAD"
-resolved_reference = "8aa3ee81977ecc7784f11a7ad40a567edf8e4884"
+resolved_reference = "708133a60d718440a8fcff3372b85747e1bdfd73"
 
 [[package]]
 name = "h11"
@@ -679,6 +680,18 @@ groups = ["main"]
 files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
     {file = "mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"},
+]
+
+[[package]]
+name = "nest-asyncio"
+version = "1.6.0"
+description = "Patch asyncio to allow nested event loops"
+optional = false
+python-versions = ">=3.5"
+groups = ["main"]
+files = [
+    {file = "nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c"},
+    {file = "nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe"},
 ]
 
 [[package]]

@@ -17,10 +17,10 @@ which can be invoked from the command line:
     - compare: compares two pipeline runs.
 """
 
+from glom import glom
 import json
 import os
 from rich.console import Console
-from glom import glom
 from rich.table import Table
 from rich.text import Text
 import sys
@@ -89,6 +89,7 @@ class MenuPipeline(Pipeline):
         # require configuration dicts.
         default_config = {
             "prepare": {
+                "compress": False,
                 "prune": True,
                 "template": "samples/menu/template.txt",
                 "template_text": Internal(),
@@ -169,10 +170,11 @@ class MenuPipeline(Pipeline):
             cart_literals = collect_string_literals(cart)
             full_query = [user_query] + cart_literals
             reachable = build_filtered_types(type_defs, symbols, indexer, full_query)
+            compress = str(glom(self.config(), "prepare.compress", default=False)) == "True"
             pruned = (
-                format_menu(reachable)
+                format_menu(reachable, compress)
                 if str(self.config()["prepare"]["prune"]) == "True"
-                else format_menu(type_defs)
+                else format_menu(type_defs, compress)
             )
 
             messages = [
@@ -234,10 +236,11 @@ class MenuPipeline(Pipeline):
 
     # This method is used to summarize the results of each a pipeline run.
     # It is invoked by the `run`, `rerun`, and `summarize` sub-commands.
-    def summarize(self, runlog):
+    def summarize(self, make_console, runlog):
+        console = make_console("text/plain")
         results = runlog["results"]
         if len(results) == 0:
-            print("No results.")
+            console.print("No results.")
         else:
             # To make the summary more readable, create a short, unique prefix
             # for each case id.
@@ -313,20 +316,23 @@ class MenuPipeline(Pipeline):
 
     # If uuid_prefix is specified, format those cases whose uuids start with
     # uuid_prefix. Otherwise, format all cases.
-    def format(self, runlog, uuid_prefix):
+    def format(self, make_console, runlog, uuid_prefix):
+        console = make_console("text/markdown")
         # Lazily load the GPT-4o tokenizer here so that we don't slow down
         # other scenarios that don't need it.
         if not hasattr(self, "_tokenizer"):
             self._tokenizer = tiktoken.get_encoding("cl100k_base")
 
-        complete = format_menu(type_defs)
+        compress = str(glom(runlog, "metadata.pipeline.prepare.compress", default="False")) == "True"
+
+        complete = format_menu(type_defs, compress)
         complete_tokens = len(self._tokenizer.encode(complete))
 
-        print(f"## Run: {runlog['uuid']}")
+        console.print(f"## Run: {runlog['uuid']}")
 
         results = runlog["results"]
         if len(results) == 0:
-            print("No results.")
+            console.print("No results.")
         else:
             # To make the summary more readable, create a short, unique prefix
             # for each case id.
@@ -335,69 +341,69 @@ class MenuPipeline(Pipeline):
             for result in results:
                 if uuid_prefix and not result["case"]["uuid"].startswith(uuid_prefix):
                     continue
-                print(f"## Case: {short_id(result['case']['uuid'])}")
+                console.print(f"## Case: {short_id(result['case']['uuid'])}")
                 if result["succeeded"]:
                     cost = result["stages"]["assess"]["cost"]
                     if cost == 0:
-                        print("**PASSED**  ")
+                        console.print("**PASSED**  ")
                     else:
-                        print(f"**FAILED:** cost={cost}  ")
+                        console.print(f"**FAILED:** cost={cost}  ")
                         # print(
                         #     f"**FAILED**: expected\n~~~json\n{json.dumps(result['case']["turns"][-1]['expected'], indent=2)}\n~~~\n\n"
                         # )
                     # print(result["case"]["comment"])
-                    print()
+                    console.print()
 
-                    print(f"Keywords: {', '.join(result['case'].get('keywords', []))}  ")
+                    console.print(f"Keywords: {', '.join(result['case'].get('keywords', []))}  ")
 
                     input_tokens = sum(
                         len(self._tokenizer.encode(message["content"]))
                         for message in result["stages"]["prepare"]["messages"]
                     )
-                    print(f"Complete menu tokens: {complete_tokens}  ")
-                    print(
+                    console.print(f"Complete menu tokens: {complete_tokens}  ")
+                    console.print(
                         f"Input tokens: {input_tokens}, output tokens: {len(self._tokenizer.encode(result['stages']['infer']))}"
                     )
-                    print()
+                    console.print()
 
                     for x in result["stages"]["prepare"]["messages"]:
                         if x["role"] == "assistant" or x["role"] == "system":
-                            print(f"**{x['role']}:**")
-                            print("```json")
-                            print(x["content"])
-                            print("```")
+                            console.print(f"**{x['role']}:**")
+                            console.print("```json")
+                            console.print(x["content"])
+                            console.print("```")
                         elif x["role"] == "user":
-                            print(f"**{x['role']}:** _{x['content']}_")
-                        print()
-                    print(f"**assistant:**")
-                    print("```json")
-                    print(json.dumps(result["stages"]["extract"], indent=2))
-                    print("```")
-                    print()
+                            console.print(f"**{x['role']}:** _{x['content']}_")
+                        console.print()
+                    console.print(f"**assistant:**")
+                    console.print("```json")
+                    console.print(json.dumps(result["stages"]["extract"], indent=2))
+                    console.print("```")
+                    console.print()
 
                     if cost > 0:
-                        print("**Repairs:**")
+                        console.print("**Repairs:**")
                         for step in result["stages"]["assess"]["steps"]:
-                            print(f"* {step}")
+                            console.print(f"* {step}")
                     else:
-                        print("**No repairs**")
+                        console.print("**No repairs**")
 
-                    print()
-                    print("**Full query**:")
+                    console.print()
+                    console.print("**Full query**:")
                     for x in result["stages"]["prepare"]["full_query"]:
-                        print(f"* {x}")
-                    print()
+                        console.print(f"* {x}")
+                    console.print()
 
                 else:
-                    print("**ERROR**  ")
-                    print(f"Error: {result['exception']['message']}")
-                    print("~~~")
-                    print(f"Traceback: {result['exception']['traceback']}")
-                    print(f"Time: {result['exception']['time']}")
-                    print("~~~")
+                    console.print("**ERROR**  ")
+                    console.print(f"Error: {result['exception']['message']}")
+                    console.print("~~~")
+                    console.print(f"Traceback: {result['exception']['traceback']}")
+                    console.print(f"Time: {result['exception']['time']}")
+                    console.print("~~~")
 
-    def compare(self, a, b):
-        console = Console()
+    def compare(self, make_console, a, b):
+        console = make_console("text/plain")
         console.print("TODO: compare()")
 
         if a["uuid"] == b["uuid"]:
@@ -531,8 +537,9 @@ class Perfect(Model):
         return {}
 
 
-def format_menu(type_defs):
-    return "\n".join([x.format() for x in type_defs])
+def format_menu(type_defs, compress=False):
+    separator = "" if compress else "\n"
+    return separator.join([x.format() for x in type_defs])
 
 
 def go():

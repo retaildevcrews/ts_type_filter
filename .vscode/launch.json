@@ -10,9 +10,14 @@
       "request": "launch",
       "program": "samples/menu/ordering.py",
       "console": "integratedTerminal",
+      // "justMyCode": false,
       "args": [
-        "format",
-        "9bfc"
+        "run",
+        "menu",
+        "samples\\menu\\cases2.json",
+        "infer.model.name=perfect"
+        // "format",
+        // "9bfc"
       ]
     },
     {

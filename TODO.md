@@ -1,10 +1,23 @@
 # TODO
 
 Top
+* Notebook example
+* Erase old files
+* Test dev container in codespaces
+* Update documentation
+  * README instructions
+  * Pointer to architecture document - samples/menu/algorithm.md
+  * Pointer to index documents
+  * Update menu.ts to use LITERAL<> and HINT<>
 * Add comment field to cases and format()
 * Can add-id put the uuids at the top?
-* x Consistent capitalization in amounts
 * Encapsulate pruning code in convenience function
+* Pydantic serializer
+* TS type parser + equivalent LLM prompt
+* TS types for HINT, LITERAL w/aliases, PIN
+* Cafe menu
+* Kids meal menu
+* x Consistent capitalization in amounts
 * x Modify index to take array of text
 * x Formatter show extracted text
 

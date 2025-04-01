@@ -2,7 +2,7 @@
 
 The goal of the pruning algoritihm is to create a new, smaller type definition that preserves that semanics of the orgiginal type definition for scenarios involving a subset terms from string literal types.
 
-## Initial ALgorithm
+## Initial Algorithm
 
 * Given a sequence of query terms, mark each string literal type that matches one or more query terms.
 * Convert other string literal types to type `never`.
@@ -36,8 +36,8 @@ One solution is to provide a means to inform the pruning algoritm of aliases to 
 
 ~~~typescript
 type Drinks = {
-  name: "root beer" | LITERAL<"coca cola", "coke">;
-  size: LITERAL<"small", "value"> | "medium" | "large";
+  name: "root beer" | LITERAL<"coca cola", ["coke"]>;
+  size: LITERAL<"small", ["value"]> | "medium" | "large";
 }
 ~~~
 

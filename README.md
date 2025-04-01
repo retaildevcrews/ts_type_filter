@@ -68,3 +68,17 @@ TODO:
 5. `.venv\Scripts\activate`
 6. `poetry install --no-root`
 
+~~~bash
+% gotag run menu samples\menu\cases2.json infer.model.name=perfect prepare.compress=True
+
+% gotag format latest > junk\out3.md
+~~~
+
+## Samples
+
+COMING SOON
+
+## Documentation
+
+* [Inverted Index](./documentation/inverted-index.md)
+* [Type Pruning Algorithm](./documentation/algorithm.md)
