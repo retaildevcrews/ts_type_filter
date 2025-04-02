@@ -1,0 +1,35 @@
+?start: define
+
+define: comment? "type" CNAME type_params? "=" type ";"
+
+comment: COMMENT
+
+type_params: "<" param_def ("," param_def)* ">"
+param_def: CNAME ("extends" type)?
+
+?type: union
+
+?union: intersection ("|" intersection)*
+?intersection: array
+
+?array: primary ("[" "]")?
+
+?primary: literal
+        | "never"         -> never
+        | type_ref
+        | struct
+        | "(" type ")"
+
+type_ref: CNAME type_args?
+type_args: "<" type ("," type)* ">"
+
+struct: "{" [pair ("," pair)*] "}"
+pair: CNAME ":" type
+
+literal: ESCAPED_STRING
+
+COMMENT: /\/\/[^\n]*/
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.WS
+%ignore WS
