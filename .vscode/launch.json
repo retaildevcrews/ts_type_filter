@@ -24,7 +24,7 @@
       "name": "parse",
       "type": "debugpy",
       "request": "launch",
-      "program": "ts_type_filter/ts_parser.py",
+      "program": "ts_type_filter/ts_parser2.py",
       "console": "integratedTerminal",
       ]
     },
