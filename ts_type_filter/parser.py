@@ -17,7 +17,7 @@ grammar = r"""
 
 lines: (define | COMMENT)*
 
-define: COMMENT* "type" CNAME type_params? "=" type ";"
+define: "type" CNAME type_params? "=" type (";")?
 
 type_params: "<" param_def ("," param_def)* ">"
 param_def: CNAME ("extends" type)?
@@ -39,8 +39,9 @@ array_suffix: "[" "]"
 type_ref: CNAME type_args?
 type_args: "<" type ("," type)* ">"
 
-struct: "{" [pair (("," | ";") pair)*] ("," | ";")? "}"
-pair: CNAME ":" type
+struct: "{" [field (("," | ";") field)*] ("," | ";")? "}"
+field: CNAME QUESTION? ":" type
+QUESTION: "?"
 
 literal: numeric_literal | string_literal
 numeric_literal: SIGNED_NUMBER
@@ -66,9 +67,20 @@ def isToken(node, type_name):
 # Transformer class that turns parse tree into AST nodes
 class Transformer(lark.Transformer):
     def lines(self, children):
-        return [
-            x for x in children if isinstance(x, Define)
-        ]  # Filter out comments and keep only Define nodes
+        result = []
+        for child in children:
+            if isToken(child, "COMMENT"):
+                if child.value.startswith("// Hint: "):
+                    result.append("//" + child[8:])
+            else:
+                result.append(child)
+        return result
+        # def predicate(x):
+        #     return not isToken(x, "COMMENT") or x.value.startswith("// Hint:")
+        # return children
+        # return [
+        #     x for x in children if isinstance(x, Define)
+        # ]  # Filter out comments and keep only Define nodes
 
     def define(self, children):
         hint = None
@@ -106,6 +118,14 @@ class Transformer(lark.Transformer):
 
     def struct(self, items):
         return Struct(dict(items))
+
+    def field(self, items):
+        name = items.pop(0).value
+        if isToken(items[0], "QUESTION"):
+            name = name + "?"
+            items.pop(0)
+        value = items.pop(0)
+        return [name, value]
 
     def pair(self, items):
         return (items[0].value, items[1])

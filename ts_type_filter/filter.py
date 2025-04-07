@@ -214,7 +214,7 @@ class Literal(Node):
         self.pinned = pinned
 
     def format(self):
-        return json.dumps(self.text)
+        return json.dumps(self.text, ensure_ascii=False)
 
     def index(self, symbols, indexer):
         indexer.add(self)
@@ -335,14 +335,11 @@ class Type(Node):
         )
 
     def index(self, symbols, indexer):
-        # print(f"indexing {self.name}")
         if self.params:
             for p in self.params:
                 p.index(symbols, indexer)
 
     def filter(self, subgraph):
-        # if (self.name == "TwoThreeChoices"):
-        #     print("type 123")
         if not subgraph.is_local(
             self.name
         ):  # TODO: BUGBUG: This doesn't seem right - should be name of Type of Type
