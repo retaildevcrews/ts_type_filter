@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import ast
 from collections import OrderedDict
 import json
 
@@ -183,8 +182,6 @@ class Define(Node):
         self.type.index(symbols, indexer)
 
     def filter(self, subgraph):
-        # if (self.name == "TwoThreeChoices"):
-        #     print("define 456")
         filtered_params = [p.filter(subgraph) for p in self.params]
         if any(p.extends and isinstance(p.extends, Never) for p in filtered_params):
             return Define(self.name, filtered_params, Never(), self.hint)
@@ -212,7 +209,6 @@ class Define(Node):
 
 class Literal(Node):
     def __init__(self, text, aliases=None, pinned=False):
-        # self.text = ast.literal_eval(text)
         self.text = text
         self.aliases = aliases
         self.pinned = pinned

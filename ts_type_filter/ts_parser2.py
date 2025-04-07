@@ -1,6 +1,5 @@
 import ast
-from lark import Lark, Transformer, Token, Tree, v_args
-import json
+from lark import Lark, Transformer, Token, v_args
 import os
 import sys
 
@@ -9,15 +8,11 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from ts_type_filter import (
-    Any,
     Array,
-    build_type_index,
-    build_filtered_types,
     Define,
     Literal,
     Never,
     ParamDef,
-    ParamRef,
     Struct,
     Type,
     Union,
@@ -35,7 +30,7 @@ param_def: CNAME ("extends" type)?
 
 ?type: union
 
-?union: intersection ("|" intersection)*
+?union: ("|")? intersection ("|" intersection)*
 ?intersection: array
 
 array: primary array_suffix*
@@ -50,7 +45,7 @@ array_suffix: "[" "]"
 type_ref: CNAME type_args?
 type_args: "<" type ("," type)* ">"
 
-struct: "{" [pair ("," pair)*] "}"
+struct: "{" [pair (("," | ";") pair)*] ("," | ";")? "}"
 pair: CNAME ":" type
 
 literal: numeric_literal | string_literal
@@ -105,9 +100,10 @@ class ToAST(Transformer):
         return items
 
     def array(self, items):
-        if len(items) == 2:
-            return Array(items[0])
-        return items[0]
+        result = items[0]
+        for _ in range(len(items) - 1):
+            result = Array(result)
+        return result
 
     def struct(self, items):
         return Struct(dict(items))
