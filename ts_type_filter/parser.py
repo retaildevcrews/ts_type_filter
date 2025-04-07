@@ -1,11 +1,5 @@
 import ast
-from lark import Lark, Transformer, Token, v_args
-import os
-import sys
-
-# Add the parent directory to the sys.path so that we can import from the
-# gotaglio package, as if it had been installed.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import lark
 
 from ts_type_filter import (
     Array,
@@ -62,24 +56,29 @@ ESCAPED_STRING2 : "'" _STRING_ESC_INNER "'"
 %ignore WS
 """
 
-parser = Lark(grammar, start="start")
+parser = lark.Lark(grammar, start="start")
+
 
 def isToken(node, type_name):
-    return isinstance(node, Token) and node.type == type_name
+    return isinstance(node, lark.Token) and node.type == type_name
 
 
 # Transformer class that turns parse tree into AST nodes
-class ToAST(Transformer):
+class Transformer(lark.Transformer):
     def lines(self, children):
-        return [x for x in children if isinstance(x, Define)]  # Filter out comments and keep only Define nodes
+        return [
+            x for x in children if isinstance(x, Define)
+        ]  # Filter out comments and keep only Define nodes
 
     def define(self, children):
         hint = None
-        while isToken(children[0], 'COMMENT'):
+        while isToken(children[0], "COMMENT"):
             hint = children.pop(0).value[2:].strip()  # Strip `// ` from comment token
 
         name = children.pop(0).value  # Get the name of the type
-        params = children.pop(0) if type(children[0]) == list else []  # Get type parameters if any
+        params = (
+            children.pop(0) if type(children[0]) == list else []
+        )  # Get type parameters if any
         value = children.pop()  # The type definition itself
         return Define(name, params, value, hint)
 
@@ -132,16 +131,6 @@ class ToAST(Transformer):
         return Union(*items)
 
 
-# Example usage
-def parse_ts(text):
+def parse(text):
     tree = parser.parse(text)
-    return ToAST().transform(tree)
-
-
-# Example
-if __name__ == "__main__":
-#     ts = """// some comment
-# type Result<T extends string> = { status: "ok" | "fail", data: T[] };"""
-    ts = '// comment\ntype A = "hi";'
-    node = parse_ts(ts)
-    print(node.format())
+    return Transformer().transform(tree)

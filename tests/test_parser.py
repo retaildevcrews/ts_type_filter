@@ -1,6 +1,6 @@
 import pytest
 
-from ts_type_filter.ts_parser2 import parse_ts
+from ts_type_filter import parse
 
 test_cases = [
     # x multiline input
@@ -73,7 +73,7 @@ test_cases = [
     "source, expected, test_name", test_cases, ids=[x[2] for x in test_cases]
 )
 def test_one_case(source, expected, test_name):
-    tree = parse_ts(source)
+    tree = parse(source)
     observed = '\n'.join([node.format() for node in tree])
     assert (
         observed == expected
@@ -313,8 +313,8 @@ type CHOOSE = "CHOOSE";
 """
 
 def test_comprehensive():
-    tree = parse_ts(comprehensive)
+    tree = parse(comprehensive)
     observed = '\n'.join([node.format() for node in tree])
     assert (
         observed == comprehensive
-    ), f"❌ Test Failed: comprehensive | Observed \n{observed}\nExpected \n{expected}"
+    ), f"❌ Test Failed: comprehensive | Observed \n{observed}\nExpected \n{comprehensive}"

@@ -1,5 +1,5 @@
 from .inverted_index import Index
-from .type_filter import (
+from .filter import (
     Any,
     Array,
     build_filtered_types,
@@ -14,6 +14,9 @@ from .type_filter import (
     Type,
     Union,
 )
+from .parser import (
+    parse,
+)
 
 __all__ = [
     "Any",
@@ -27,6 +30,7 @@ __all__ = [
     "Never",
     "ParamDef",
     "ParamRef",
+    "parse",
     "Struct",
     "Type",
     "Union",
