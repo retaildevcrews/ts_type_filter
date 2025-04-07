@@ -1,3 +1,4 @@
+import ast
 from lark import Lark, Transformer, Token, Tree, v_args
 import json
 import os
@@ -23,11 +24,11 @@ from ts_type_filter import (
 )
 
 grammar = r"""
-?start: define
+?start: lines
 
-define: COMMENT? "type" CNAME type_params? "=" type ";"
+lines: (define | COMMENT)*
 
-comment: COMMENT
+define: COMMENT* "type" CNAME type_params? "=" type ";"
 
 type_params: "<" param_def ("," param_def)* ">"
 param_def: CNAME ("extends" type)?
@@ -37,7 +38,8 @@ param_def: CNAME ("extends" type)?
 ?union: intersection ("|" intersection)*
 ?intersection: array
 
-?array: primary ("[" "]")?
+array: primary array_suffix*
+array_suffix: "[" "]"
 
 ?primary: literal
         | "never"         -> never
@@ -51,59 +53,41 @@ type_args: "<" type ("," type)* ">"
 struct: "{" [pair ("," pair)*] "}"
 pair: CNAME ":" type
 
-literal: ESCAPED_STRING
+literal: numeric_literal | string_literal
+numeric_literal: SIGNED_NUMBER
+string_literal: ESCAPED_STRING | ESCAPED_STRING2
 
 COMMENT: /\/\/[^\n]*/
+ESCAPED_STRING2 : "'" _STRING_ESC_INNER "'"
 %import common.CNAME
 %import common.ESCAPED_STRING
+%import common._STRING_ESC_INNER
+%import common.SIGNED_NUMBER
 %import common.WS
 %ignore WS
 """
 
-
-# # Load grammar from string or file
-# with open("ts_type_filter/typescript.lark") as f:
-#     grammar = f.read()
-
 parser = Lark(grammar, start="start")
+
+def isToken(node, type_name):
+    return isinstance(node, Token) and node.type == type_name
 
 
 # Transformer class that turns parse tree into AST nodes
 class ToAST(Transformer):
-    def define(self, items):
-        i = 0
+    def lines(self, children):
+        return [x for x in children if isinstance(x, Define)]  # Filter out comments and keep only Define nodes
+
+    def define(self, children):
         hint = None
-        if isinstance(items[i], Token) and items[i].type == 'COMMENT':
-            hint = items[i].value[2:].strip()  # Strip `// ` from comment token
-            i += 1
-        name = items[i].value
-        i += 1
-        params = []
-        if i < len(items) - 1:
-            params = items[i]
-            i += 1
-        value = items[i]
-        # hint = items[0].value[2:].strip() if isinstance(items[0], str) else None
-        # name = items[1].value if hint else items[0].value
-        # # name = items[1].value if hint else items[0].children[0].value
-        # params = items[2] if hint else items[1]
-        # type_ = items[3] if hint else items[2]
+        while isToken(children[0], 'COMMENT'):
+            hint = children.pop(0).value[2:].strip()  # Strip `// ` from comment token
+
+        name = children.pop(0).value  # Get the name of the type
+        params = children.pop(0) if type(children[0]) == list else []  # Get type parameters if any
+        value = children.pop()  # The type definition itself
         return Define(name, params, value, hint)
 
-    # def define(self, items):
-    #     if isinstance(items[0], Tree) and items[0].data == "comment":
-    #         hint = items[0].children[0][2:].strip()  # Strip `// ` from comment token
-    #         name = items[1].value
-    #         params = items[2] if isinstance(items[2], list) else []
-    #         type_ = items[3]
-    #     else:
-    #         hint = None
-    #         name = items[0].value
-    #         params = items[1] if isinstance(items[1], list) else []
-    #         type_ = items[2]
-
-    #     return Define(name, params, type_, hint)
-    
     def type_params(self, items):
         return items
 
@@ -132,7 +116,16 @@ class ToAST(Transformer):
         return (items[0].value, items[1])
 
     def literal(self, items):
-        return Literal(json.loads(items[0]))
+        return Literal(items[0])
+
+    def string_literal(self, items):
+        return ast.literal_eval(items[0])
+
+    def numeric_literal(self, items):
+        try:
+            return int(items[0])
+        except ValueError:
+            return float(items[0])
 
     def never(self, _):
         return Never()

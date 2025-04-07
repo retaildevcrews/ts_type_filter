@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import ast
 from collections import OrderedDict
 import json
 
@@ -211,6 +212,7 @@ class Define(Node):
 
 class Literal(Node):
     def __init__(self, text, aliases=None, pinned=False):
+        # self.text = ast.literal_eval(text)
         self.text = text
         self.aliases = aliases
         self.pinned = pinned
