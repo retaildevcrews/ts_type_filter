@@ -47,25 +47,32 @@ This filtered menu uses only 47 tokens. The potential savings due to filtering i
 
 `ts_type_filter` provides an algorithm to prune TypeScript type definitions based an a set of keywords. The algorithm first parses the TypeScript into an abstract syntax tree. It then builds an inverted index of the terms in the string type literals, and this index is used to prune the type definitions, based on the current contents of the shopping cart and the customer's request. You can learn more about the inverted index [here](./documentation/inverted-index.md).
 
-## Sample Application
+## Sample Applications
 
-~~~
-    7  . .venv/bin/activate
-   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
+`ts_type_filter` includes four samples:
+* [simple.ipynb](./samples/menu/simple.ipynb) - notebook demonstrates `ts_type_filter` api usage.
+* [pipeline.ipynb](./samples/menu/pipeline.ipynb) - notebook demonstrates a
+[Gotaglio](https://github.com/MikeHopcroft/gotaglio) pipeline that uses
+`ts-type-filter` to optimize LLM prompts for a ficticious restaurant ordering bot.
+* [gotag cli](./samples/menu/gotag.md) - shell script that runs the pipeline.
+* [query cli](./samples/inverted_index/query.md) - shell script demonstrates inverted index of Shakespear sonnets.
 
-    1  gotag
-    2  ./gotag
-    3  poetry install
-    4  tail .bashrc
-    5  tail ~/.bashrc
-    6  ls .venv
-    7  . .venv/bin/activate
-    8  ./gotag
-    9  ./gotag run menu 
-   10  ./gotag run menu samples/menu/cases2.json
-   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
-   12  history
-~~~
+You need a properly configured development to run the samples.
+
+## Development Environments
+
+The easiest way to try out the samples is in a [GitHub Codespace](./documentation/codespaces.md). This approach spins up a fully configured dev container connected to an instance of [Visual Studio Code](https://code.visualstudio.com/), running in your browser.
+
+You can also clone the repo on your local workstation, install some tools and PyPi packages and then run the samples locally.
+
+Here are instructions for both approaches:
+* [GitHub Codespace](./documentation/codespaces.md)
+* [Cloning to Local Repo](./documentation/clone.md)
+
+## Documentation
+
+* [Inverted Index](./documentation/inverted-index.md)
+* [Type Pruning Algorithm](./documentation/algorithm.md)
 
 ## Using ts_type_filter
 
@@ -95,11 +102,21 @@ TODO:
 % gotag format latest > junk\out3.md
 ~~~
 
-## Samples
+~~~
+    7  . .venv/bin/activate
+   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
 
-COMING SOON
+    1  gotag
+    2  ./gotag
+    3  poetry install
+    4  tail .bashrc
+    5  tail ~/.bashrc
+    6  ls .venv
+    7  . .venv/bin/activate
+    8  ./gotag
+    9  ./gotag run menu 
+   10  ./gotag run menu samples/menu/cases2.json
+   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
+   12  history
+~~~
 
-## Documentation
-
-* [Inverted Index](./documentation/inverted-index.md)
-* [Type Pruning Algorithm](./documentation/algorithm.md)
