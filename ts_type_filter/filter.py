@@ -136,7 +136,51 @@ class AnyNode(Node):
         visitor(self)
         pass
 
+
 Any = AnyNode()
+
+
+class FalseNode(Node):
+    def __init__(self, pinned=True):
+        pass
+
+    def format(self):
+        return "false"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+
+FalseValue = FalseNode()
+
+
+class TrueNode(Node):
+    def __init__(self, pinned=True):
+        pass
+
+    def format(self):
+        return "true"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+
+TrueValue = TrueNode()
+
 
 class Array(Node):
     def __init__(self, type):
@@ -212,9 +256,6 @@ class Literal(Node):
         self.text = text
         self.aliases = aliases
         self.pinned = pinned
-        # TODO: BUGBUG: remove this hack
-        if text == "CHOOSE" or text == "Regular" or text == "Medium": # or text == "Jalapeno Poppers":
-            self.pinned = True
 
     def format(self):
         return json.dumps(self.text, ensure_ascii=False)
@@ -416,6 +457,8 @@ def build_symbol_table(nodes):
             symbols.add(node.name, node)
     # TODO: BUGBUG: is this necessary?
     symbols.add("any", Any)
+    symbols.add("false", FalseValue)
+    symbols.add("true", TrueValue)
     return symbols
 
 
@@ -449,7 +492,7 @@ def build_filtered_types(type_defs, symbols, indexer, text):
             filtered.append(f)
             # print(f"{i}:\n  {n.format()}\n  {f.format()}")
 
-    # print() 
+    # print()
     # print("+++ Filtered Types ++++++++++++")
     # for n in filtered:
     #     print(n.format())
@@ -463,6 +506,9 @@ def build_filtered_types(type_defs, symbols, indexer, text):
             reachable[node] = None
 
     filtered[0].visit(subgraph, visitor)
+
+    # NOTE that the nodes in reachable are in traversal order,
+    # not source order.
     return reachable
 
 

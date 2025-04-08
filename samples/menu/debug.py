@@ -27,7 +27,7 @@ type_defs2 = parse(type_text2)
 # Adds WiseguyMeal, ComboSizes, CHOOSE, ChooseDrink
 type_defs3 = original_type_defs
 
-type_defs = type_defs3
+type_defs = type_defs1
 
 text1 = [x.format() for x in type_defs1]
 text2 = [x.format() for x in type_defs2]

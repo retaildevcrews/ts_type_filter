@@ -431,7 +431,7 @@ type_defs = [
             Literal("Sweetened Tea"),
             Literal("Unsweetened Tea"),
             Literal("Strawberry Lemonade"),
-            Literal("Arnold Palmer", ["iced team lemonade"]),
+            Literal("Arnold Palmer", ["iced tea lemonade"]),
             Literal("Powerade Zero"),
         ),
     ),

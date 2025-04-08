@@ -1,11 +1,18 @@
 # TODO
 
-Top
-* Implement LITERAL<text, pinned, aliases>
-  * Remove hack/workaround code
-  * Reevaluate indexing of `any`
+Top Top
+* x Why do definitions appear in different order than menu.py
+  * They are in traveral order, not source order.
+  * Putting them in source order would require passing an order field to each of the constructors. This is a fairly significant change for a modest benefit.
+  * In debug.py, CHOOSE is the fifth definition
+* x Implement LITERAL<text, pinned, aliases>
+  * x Remove hack/workaround code
+  * x Reevaluate indexing of `any`
 * Hint comments really need to be part of Define so they are not filtered out
 * Investigate snowball treatment of Jalapeños
+* Don't emit semicolons after {}, []
+
+Top
 * dev container
   * .venv is not activated for some reason
   * ./gotag is not on path

@@ -1,6 +1,6 @@
 import pytest
 
-from ts_type_filter import parse
+from ts_type_filter import parse, Define, Literal
 
 test_cases = [
     # x multiline input
@@ -64,6 +64,12 @@ test_cases = [
     # <A extends T>
     ("type A<B extends C>={a:B};", "type A<B extends C>={a:B};", "extends 1"),
 
+    # LITERAL - these just ensure correct serialization without crashing.
+    # A separate test checks the aliases and pinned values.
+    ("type A = LITERAL<'Coca-Cola', [], true>", 'type A="Coca-Cola";', "LITERAL1"),
+    ("type A = LITERAL<'Coca-Cola', ['coke'], true>", 'type A="Coca-Cola";', "LITERAL2"),
+    ("type A = LITERAL<'Coca-Cola', ['coke', 'pop'], true>", 'type A="Coca-Cola";', "LITERAL3"),
+
     # A slightly longer case found while debugging
     (
         'type Optional="No"|"Regular";\n// Hint: Use CHOOSE when customer doesn''t specify an option\ntype CHOOSE="CHOOSE";',
@@ -98,7 +104,7 @@ test_cases = [
 @pytest.mark.parametrize(
     "source, expected, test_name", test_cases, ids=[x[2] for x in test_cases]
 )
-def test_one_case(source, expected, test_name):
+def test_cases(source, expected, test_name):
     tree = parse(source)
     observed = '\n'.join([node.format() for node in tree])
     assert (
@@ -171,3 +177,19 @@ def test_comprehensive_no_semicolon():
             assert(o[i] == "//" + e[i][8:])
         else:
             assert(o[i] == e[i])
+
+def test_literalex():
+    tree = parse("type A = LITERAL<'Coca-Cola', ['coke', 'pop'], true>")
+    o = [node.format() for node in tree]
+    e = ['type A="Coca-Cola";']
+    assert(o == e)
+    assert(len(tree) == 1)
+    define = tree[0]
+    assert(isinstance(define, Define))
+    assert(define.name == "A")
+    literal = define.type
+    assert(isinstance(literal, Literal))
+    assert(literal.text == "Coca-Cola")
+    assert(literal.pinned == True)
+    assert(literal.aliases == ['coke', 'pop'])
+    

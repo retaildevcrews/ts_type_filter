@@ -32,6 +32,7 @@ array: primary array_suffix*
 array_suffix: "[" "]"
 
 ?primary: literal
+        | literalex
         | "never"         -> never
         | "any"           -> any
         | type_ref
@@ -44,6 +45,12 @@ type_args: "<" type ("," type)* ">"
 struct: "{" [field (("," | ";") field)*] ("," | ";")? "}"
 field: CNAME QUESTION? ":" type
 QUESTION: "?"
+
+literalex: "LITERAL" "<" string_literal "," string_literal_list "," boolean_literal ">"
+?string_literal_list: "[" (string_literal ("," string_literal)*)? "]"
+?boolean_literal: TRUE | FALSE
+TRUE: "true"
+FALSE: "false"
 
 literal: numeric_literal | string_literal
 numeric_literal: SIGNED_NUMBER
@@ -128,6 +135,13 @@ class Transformer(lark.Transformer):
 
     def literal(self, items):
         return Literal(items[0])
+    
+    def literalex(self, items):
+        text = items.pop(0)
+        temp = items.pop(0)
+        aliases = [temp] if isinstance(temp, str) else temp.children
+        pinned = True if items.pop(0) == "true" else False
+        return Literal(text, aliases, pinned)
 
     def string_literal(self, items):
         return ast.literal_eval(items[0])
