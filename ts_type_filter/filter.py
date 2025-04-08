@@ -120,7 +120,7 @@ class Node(ABC):
 
 
 class AnyNode(Node):
-    def __init__(self):
+    def __init__(self, pinned=True):
         pass
 
     def format(self):
@@ -212,6 +212,9 @@ class Literal(Node):
         self.text = text
         self.aliases = aliases
         self.pinned = pinned
+        # TODO: BUGBUG: remove this hack
+        if text == "CHOOSE" or text == "Regular" or text == "Medium": # or text == "Jalapeno Poppers":
+            self.pinned = True
 
     def format(self):
         return json.dumps(self.text, ensure_ascii=False)
@@ -411,6 +414,8 @@ def build_symbol_table(nodes):
     for node in nodes:
         if isinstance(node, Define):
             symbols.add(node.name, node)
+    # TODO: BUGBUG: is this necessary?
+    symbols.add("any", Any)
     return symbols
 
 
@@ -421,7 +426,12 @@ def build_type_index(type_defs):
     # Build index of terms mentioned in types.
     indexer = TypeIndex()
     for x in type_defs:
-        x.index(symbols, indexer)
+        # If x is not a comment
+        if type(x) is not str:
+            x.index(symbols, indexer)
+
+    # TODO: BUGBUG: is this necessary?
+    Any.index(symbols, indexer)
 
     return symbols, indexer
 
@@ -433,10 +443,11 @@ def build_filtered_types(type_defs, symbols, indexer, text):
 
     filtered = []
     for i, n in enumerate(type_defs):
-        f = n.filter(subgraph)
-        filtered.append(f)
-        # print(f"{i}:\n  {n.format()}\n  {f.format()}")
-    # filtered = [n.filter(subgraph) for n in type_defs]
+        # If n is not a comment
+        if type(n) is not str:
+            f = n.filter(subgraph)
+            filtered.append(f)
+            # print(f"{i}:\n  {n.format()}\n  {f.format()}")
 
     # print() 
     # print("+++ Filtered Types ++++++++++++")

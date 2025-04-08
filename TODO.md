@@ -1,6 +1,15 @@
 # TODO
 
 Top
+* Implement LITERAL<text, pinned, aliases>
+  * Remove hack/workaround code
+  * Reevaluate indexing of `any`
+* Hint comments really need to be part of Define so they are not filtered out
+* Investigate snowball treatment of Jalapeños
+* dev container
+  * .venv is not activated for some reason
+  * ./gotag is not on path
+* Update engine requirement
 * Notebook example
 * Erase old files
 * Test dev container in codespaces

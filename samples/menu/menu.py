@@ -122,7 +122,7 @@ type_defs = [
             Type(
                 "OtherFries",
                 [
-                    ParamRef(Literal("Jalapeno Poppers", [], True)),
+                    ParamRef(Literal("Jalapeño Poppers", [], True)),
                     ParamRef(Literal("6 Piece", [], True)),
                 ],
             ),
@@ -371,7 +371,7 @@ type_defs = [
         [
             ParamDef(
                 "NAME",
-                Union(Literal("Jalapeno Poppers"), Literal("Mozzarella Sticks")),
+                Union(Literal("Jalapeño Poppers"), Literal("Mozzarella Sticks")),
             ),
             ParamDef("SIZE", Type("OtherFriesSizes")),
         ],
@@ -547,7 +547,7 @@ type_defs = [
         Struct(
             {
                 "amount": Type("ExtraAmount"),
-                "name": Union(Literal("Onion Rings"), Literal("Jalopenos")),
+                "name": Union(Literal("Onion Rings"), Literal("Jalapeños")),
             }
         ),
     ),

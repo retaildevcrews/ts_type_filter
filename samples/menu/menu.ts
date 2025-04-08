@@ -1,8 +1,9 @@
-export type Cart = { items: Item[] };
+type Cart = { items: Item[] };
 
 type Item =
   | WiseguyMeal<ComboSizes>
   | Meal<ComboSizes>
+  | Wiseguy
   | PattyMelt
   | Burger
   | Chicken
@@ -57,7 +58,7 @@ type TwoThreeChoices =
   | GenericChicken<"Grilled Chicken Sandwich">
   | GenericBurger<"Bacon Cheeseburger">
   | FrenchFries<"Medium">
-  | OtherFries<"Jalapeno Poppers", "6 Piece">
+  | OtherFries<"Jalapeño Poppers", "6 Piece">
   | FountainDrink<"Coca-Cola" | "Diet Coke" | "Dr. Pepper" | "Sprite", "Medium">
   | CHOOSE;
 
@@ -146,7 +147,7 @@ type FrenchFries<SIZE extends FrenchFrySizes> = {
 type FrenchFrySizes = "Value" | "Small" | "Medium" | "Large" | CHOOSE;
 
 type OtherFries<
-  NAME extends "Jalapeno Poppers" | "Mozzarella Sticks",
+  NAME extends "Jalapeño Poppers" | "Mozzarella Sticks",
   SIZE extends OtherFriesSizes
 > = { name: NAME; size: SIZE; sauce: DippingSauce | CHOOSE };
 
@@ -183,7 +184,7 @@ type Ice = { name: "Ice"; amount: "Regular" | "Light" | "No" };
 
 type Veggies = {
   amount: ExtraAmount;
-  name: "Lettuce" | "Tomato" | "Onion" | "Pickles" | "Jalape\u00f1os";
+  name: "Lettuce" | "Tomato" | "Onion" | "Pickles" | "Jalapeños";
 };
 
 type Cheeses = GenericCheese<
@@ -211,7 +212,7 @@ type DippingSauce = {
     | "None";
 };
 
-type Extras = { amount: ExtraAmount; name: "Onion Rings" | "Jalopenos" };
+type Extras = { amount: ExtraAmount; name: "Onion Rings" | "Jalapeños" };
 
 type Preparations = {
   amount: Optional;
@@ -226,5 +227,5 @@ type ExtraAmount = "No" | "Regular" | "extra";
 
 type Optional = "No" | "Regular";
 
-// Use CHOOSE when customer doesn't specify an option
+// Hint: Use CHOOSE when customer doesn't specify an option
 type CHOOSE = "CHOOSE";

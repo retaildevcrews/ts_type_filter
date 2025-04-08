@@ -2,6 +2,7 @@ import ast
 import lark
 
 from ts_type_filter import (
+    Any,
     Array,
     Define,
     Literal,
@@ -32,6 +33,7 @@ array_suffix: "[" "]"
 
 ?primary: literal
         | "never"         -> never
+        | "any"           -> any
         | type_ref
         | struct
         | "(" type ")"
@@ -75,12 +77,6 @@ class Transformer(lark.Transformer):
             else:
                 result.append(child)
         return result
-        # def predicate(x):
-        #     return not isToken(x, "COMMENT") or x.value.startswith("// Hint:")
-        # return children
-        # return [
-        #     x for x in children if isinstance(x, Define)
-        # ]  # Filter out comments and keep only Define nodes
 
     def define(self, children):
         hint = None
@@ -144,6 +140,9 @@ class Transformer(lark.Transformer):
 
     def never(self, _):
         return Never()
+
+    def any(self, _):
+        return Any
 
     def union(self, items):
         if len(items) == 1:

@@ -39,6 +39,13 @@
       ]
     },
     {
+      "name": "debug",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "samples/menu/debug.py",
+      "console": "integratedTerminal",
+    },
+    {
       "name": "query",
       "type": "debugpy",
       "request": "launch",

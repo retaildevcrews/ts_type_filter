@@ -7,8 +7,6 @@ In some scenarios, such as restaurant menus, the Typescript type definition may 
 
 For instance, if the customer is ordering a drink it is not necessary to include the types related to sandwiches.
 
-`ts_type_filter` provides a data structure that reprpesents a complex TypeScript type definition. It maintains an inverted index of the terms in the string type literals, and this index is used to prune the type definition, based on the current contents of the shopping cart and the customer's request. You can learn more about the inverted index [here](./documentation/inverted-index.md).
-
 As an example, suppose we have a menu for a restaurant with a very small menu offering two sandwiches with some toppings, two sodas, and two juices:
 
 ~~~typescript
@@ -45,6 +43,29 @@ type SandwichOptions = { name: "tomato"; amount: "no" };
 ~~~
 
 This filtered menu uses only 47 tokens. The potential savings due to filtering is much more signifant for a large menu.
+
+
+`ts_type_filter` provides an algorithm to prune TypeScript type definitions based an a set of keywords. The algorithm first parses the TypeScript into an abstract syntax tree. It then builds an inverted index of the terms in the string type literals, and this index is used to prune the type definitions, based on the current contents of the shopping cart and the customer's request. You can learn more about the inverted index [here](./documentation/inverted-index.md).
+
+## Sample Application
+
+~~~
+    7  . .venv/bin/activate
+   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
+
+    1  gotag
+    2  ./gotag
+    3  poetry install
+    4  tail .bashrc
+    5  tail ~/.bashrc
+    6  ls .venv
+    7  . .venv/bin/activate
+    8  ./gotag
+    9  ./gotag run menu 
+   10  ./gotag run menu samples/menu/cases2.json
+   11  ./gotag run menu samples/menu/cases2.json infer.model.name=perfect
+   12  history
+~~~
 
 ## Using ts_type_filter
 
