@@ -1,6 +1,7 @@
 # TODO
 
 Top Top
+* Verify CHOOSE pinning. Why do we get type DrinkSizes="CHOOSE" instead of CHOOSE?
 * x Why do definitions appear in different order than menu.py
   * They are in traveral order, not source order.
   * Putting them in source order would require passing an order field to each of the constructors. This is a fairly significant change for a modest benefit.
@@ -13,6 +14,7 @@ Top Top
 * Don't emit semicolons after {}, []
 
 Top
+* Notebooks should have help accessing models.json and .credentials.json
 * dev container
   * .venv is not activated for some reason
   * ./gotag is not on path

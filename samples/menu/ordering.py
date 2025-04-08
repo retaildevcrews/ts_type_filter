@@ -296,7 +296,6 @@ class MenuPipeline(Pipeline):
                 )
 
             # Display the table and the totals.
-            console = Console()
             console.print(table)
             console.print()
             console.print(f"Total: {total_count}")
