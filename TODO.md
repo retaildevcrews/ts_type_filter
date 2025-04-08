@@ -1,7 +1,9 @@
 # TODO
 
 Top Top
+* Formatting of pipeline.ipynb markdown in github.
 * Verify CHOOSE pinning. Why do we get type DrinkSizes="CHOOSE" instead of CHOOSE?
+* PRUNING challenge: "a wiseguy without tomatoes"
 * x Why do definitions appear in different order than menu.py
   * They are in traveral order, not source order.
   * Putting them in source order would require passing an order field to each of the constructors. This is a fairly significant change for a modest benefit.
