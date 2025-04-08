@@ -41,13 +41,21 @@ type Meal<SIZE extends ComboSizes> = {
 };
 
 type ComboTwo = {
-  name: "Twofer Combo";
+  name: LITERAL<
+    "Twofer Combo",
+    ["pick choose two combination meal deal"],
+    false
+  >;
   one: TwoThreeChoices;
   two: TwoThreeChoices;
 };
 
 type ComboThree = {
-  name: "Threefer Combo";
+  name: LITERAL<
+    "Threefer Combo",
+    ["pick choose three combination meal deal"],
+    false
+  >;
   one: TwoThreeChoices;
   two: TwoThreeChoices;
   three: TwoThreeChoices;
@@ -56,13 +64,22 @@ type ComboThree = {
 type TwoThreeChoices =
   | Wiseguy
   | GenericChicken<"Grilled Chicken Sandwich">
-  | GenericBurger<"Bacon Cheeseburger">
-  | FrenchFries<"Medium">
-  | OtherFries<"Jalapeño Poppers", "6 Piece">
-  | FountainDrink<"Coca-Cola" | "Diet Coke" | "Dr. Pepper" | "Sprite", "Medium">
+  | GenericBurger<LITERAL<"Bacon Cheeseburger", ["buger"], false>>
+  | FrenchFries<LITERAL<"Medium", [], true>>
+  | OtherFries<
+      LITERAL<"Jalapeño Poppers", [], true>,
+      LITERAL<"6 Piece", [], true>
+    >
+  | FountainDrink<
+      | LITERAL<"Coca-Cola", ["coca", "cola", "coke"], false>
+      | LITERAL<"Diet Coke", ["coca", "cola"], false>
+      | LITERAL<"Dr. Pepper", ["doctor"], false>
+      | "Sprite",
+      LITERAL<"Medium", [], true>
+    >
   | CHOOSE;
 
-type Wiseguy = GenericWiseguy<
+  type Wiseguy = GenericWiseguy<
   | "Wiseguy"
   | "Vegan Wiseguy"
   | "Double Wiseguy"
@@ -73,7 +90,7 @@ type Wiseguy = GenericWiseguy<
 type GenericWiseguy<NAME> = {
   name: NAME;
   type:
-    | "Regular"
+    | LITERAL<"Regular", [], true>
     | "With Bacon"
     | "With Cheese"
     | "With Bacon and Cheese"
@@ -82,7 +99,10 @@ type GenericWiseguy<NAME> = {
 };
 
 type PattyMelt = {
-  name: "Hero Melt" | "Bacon Melt" | "Mushroom and Swiss Melt";
+  name:
+    | LITERAL<"Hero Melt", ["patty"], false>
+    | LITERAL<"Bacon Melt", ["patty"], false>
+    | LITERAL<"Mushroom and Swiss Melt", ["shroom", "patty"], false>;
   options?: (Veggies | Bacon | Cheeses | Sauces | Condiments)[];
 };
 
@@ -106,7 +126,10 @@ type GenericBurger<NAME> = {
   )[];
 };
 
-type Chicken = GenericChicken<"Grilled Chicken Sandwich" | "Cordon Bleu">;
+type Chicken = GenericChicken<
+  | "Grilled Chicken Sandwich"
+  | LITERAL<"Cordon Bleu", ["chicken sandwich blue"], false>
+>;
 
 type GenericChicken<NAME> = {
   name: NAME;
@@ -115,9 +138,9 @@ type GenericChicken<NAME> = {
 
 type KoreanChicken = {
   name:
-    | "Sweet and Spicy Chicken"
-    | "Seasame Soy Chicken"
-    | "Spicy Garlic Chicken";
+    | LITERAL<"Sweet and Spicy Chicken", ["Korean fried sandwich"], false>
+    | LITERAL<"Seasame Soy Chicken", ["Korean fried sandwich"], false>
+    | LITERAL<"Spicy Garlic Chicken", ["Korean fried sandwich"], false>;
   options?: (
     | Veggies
     | Bacon
@@ -135,7 +158,11 @@ type Pitas = {
 };
 
 type Fish = {
-  name: "Captain Nemo Burger";
+  name: LITERAL<
+    "Captain Nemo Burger",
+    ["white fish cod scrod sandwich"],
+    false
+  >;
   options?: (Veggies | Bacon | Cheeses | Condiments | Preparations | Extras)[];
 };
 
@@ -166,9 +193,10 @@ type FountainDrink<NAME extends DrinkNames, SIZE extends DrinkSizes> = {
 type DrinkSizes = "Value" | "Small" | "Medium" | "Large" | CHOOSE;
 
 type DrinkNames =
-  | "Coca-Cola"
-  | "Diet Coke"
-  | "Coca-Cola Zero Sugar"
+  | LITERAL<"Coca-Cola", ["coca", "cola", "coke"], false>
+  | LITERAL<"Diet Coke", ["coca", "cola"], false>
+  | LITERAL<"Coca-Cola Zero Sugar", ["coca", "cola", "coke", "diet"], false>
+  | LITERAL<"Dr. Pepper", ["doctor"], false>
   | "Dr. Pepper"
   | "Root Beer"
   | "Diet Root Beer"
@@ -177,8 +205,8 @@ type DrinkNames =
   | "Sweetened Tea"
   | "Unsweetened Tea"
   | "Strawberry Lemonade"
-  | "Arnold Palmer"
-  | "Powerade Zero";
+  | LITERAL<"Arnold Palmer", ["iced tea lemonade"], false>
+  | LITERAL<"Powerade Zero", "Gatoraid", false>;
 
 type Ice = { name: "Ice"; amount: "Regular" | "Light" | "No" };
 
@@ -197,14 +225,18 @@ type Bacon = { amount: Optional; name: "Bacon" };
 
 type Condiments = {
   amount: Amount;
-  name: "Ketchup" | "Mustard" | "Mayo" | "BBQ";
+  name:
+    | "Ketchup"
+    | "Mustard"
+    | LITERAL<"Mayo", ["mayonnaise", "hellmanns"], false>
+    | LITERAL<"BBQ", ["barbecue"], false>;
 };
 
 type Sauces = { amount: Amount; name: "Smokey Sauce" | "Green Goddess Sauce" };
 
 type DippingSauce = {
   name:
-    | "BBQ Dipping Sauce"
+    | LITERAL<"BBQ Dipping Sauce", ["barbecue"], false>
     | "Buffalo Dipping Sauce"
     | "Cool Ranch Dipping Sauce"
     | "Honey Mustard Dipping Sauce"
@@ -221,11 +253,13 @@ type Preparations = {
 
 type Amounts = Amount | ExtraAmount | Optional;
 
-type Amount = "No" | "Light" | "Regular" | "Extra";
+type Amount = "No" | "Light" | LITERAL<"Regular", [], true> | "Extra";
 
-type ExtraAmount = "No" | "Regular" | "extra";
+type ExtraAmount = "No" | LITERAL<"Regular", [], true> | "extra";
 
-type Optional = "No" | "Regular";
+type Optional = "No" | LITERAL<"Regular", [], true>;
 
 // Hint: Use CHOOSE when customer doesn't specify an option
-type CHOOSE = "CHOOSE";
+type CHOOSE = LITERAL<"CHOOSE", [], true>;
+
+type LITERAL<NAME, ALIASES, IS_OPTIONAL> = NAME;

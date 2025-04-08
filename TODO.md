@@ -1,6 +1,7 @@
 # TODO
 
 Top Top
+* Compare of perfect and flakey shows all failures
 * Formatting of pipeline.ipynb markdown in github.
 * Verify CHOOSE pinning. Why do we get type DrinkSizes="CHOOSE" instead of CHOOSE?
 * PRUNING challenge: "a wiseguy without tomatoes"

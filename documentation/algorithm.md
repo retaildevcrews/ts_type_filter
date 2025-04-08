@@ -17,7 +17,14 @@ This approach had challenges with certain scenarios.
 
 ### Challenge 0: LLM Hint Comments
 
-Hint<TYPE, COMMENT>
+A single-line comment, starting with `// Hint:` will be associated with the
+next `type` definition and will be reproduced in any pruned type definition
+that includes the associated `type`.
+
+~~~typescript
+// Hint: Use CHOOSE when customer doesn't specify an option
+type CHOOSE = LITERAL<"CHOOSE", [], true>;
+~~~
 
 ### Challenge 1: query contains synonyms of terms in string literals
 
@@ -32,12 +39,12 @@ type Drinks = {
 
 The query, "a value sized coke" will cause type `Drinks` to collapse to `never` because none of the three terms appear in any of the string literal types.
 
-One solution is to provide a means to inform the pruning algoritm of aliases to be considered when marking string literal types. In an AST-like data structure the aliases could be provided in an additional node property. In Typescript source it could be provided by a special, built-in generic like LITERAL<TYPE, ALIASES>:
+One solution is to provide a means to inform the pruning algoritm of aliases to be considered when marking string literal types. In an AST-like data structure the aliases could be provided in an additional node property. In Typescript source it could be provided by a special, built-in generic like LITERAL<TYPE, ALIASES, PINNED>:
 
 ~~~typescript
 type Drinks = {
-  name: "root beer" | LITERAL<"coca cola", ["coke"]>;
-  size: LITERAL<"small", ["value"]> | "medium" | "large";
+  name: "root beer" | LITERAL<"coca cola", ["coke"], false>;
+  size: LITERAL<"small", ["value"], false> | "medium" | "large";
 }
 ~~~
 
@@ -97,10 +104,10 @@ type Burgers = "cheeseburger";
 type CHOOSE = "CHOOSE";
 ~~~
 
-While we can prevent type CHOOSE from collapsing by adding "CHOOSE" to the set of query terms, a better approach is to introduce the concept of "pinning", where certain nodes can be marked, declaratively, as never collapsing. If the types are represented as an AST-like data structure, the pinned status can be specified with an additional property. In TypeScript source code, pinning could be specified with a special, built-in generic, such as `Pinned<T>`.
+While we can prevent type CHOOSE from collapsing by adding "CHOOSE" to the set of query terms, a better approach is to introduce the concept of "pinning", where certain nodes can be marked, declaratively, as never collapsing. If the types are represented as an AST-like data structure, the pinned status can be specified with an additional property. In TypeScript source code, pinning could be specified with a special, built-in generic, such as `LITERAL<TYPE, ALIASES, True>`.
 
 ~~~typescript
-type CHOOSE = Pinned<"CHOOSE">;
+type CHOOSE = LITERAL<"CHOOSE", [], True>;
 ~~~
 
 ### Challenge 3
