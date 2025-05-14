@@ -1,5 +1,21 @@
 # TODO
 
+Top Top Top
+* ordering pipeline should get type defs from file
+  * filename should come from config
+* Failing case analysis
+  * 0e6 - ChooseDrink needs to be templated by SIZE
+  * c47 step 0 - Picked illegal Cheeseburger - prompt comment?
+  * c47 step 1 - Drink size in twofer is restricted to Medium. Should not be CHOOSE.
+  * 7ee - bad test case - expected value wrong
+* Flattener should copy keywords
+* Step number breaks uuid shortener
+* Replace junk.ts with menu.ts
+* Modify ordering.py to load menu.ts
+* Modify ordering.py to generate sub-result for each turn
+* Make sure README.md is clear
+* Test a larger set of cases
+
 Top Top
 * Compare of perfect and flakey shows all failures
 * Formatting of pipeline.ipynb markdown in github.

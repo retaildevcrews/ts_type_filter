@@ -1,11 +1,8 @@
 [
   {
     "uuid": "0e67dc5f-5797-4583-b65e-2d39746dd614",
-    "keywords": [
-      "single-turn",
-      "meal",
-      "p0"
-    ],
+    "keywords": ["single-turn", "meal", "p0"],
+    "cart": { "items": [] },
     "turns": [
       {
         "query": "a large wiseguy meal with coke",
@@ -28,11 +25,8 @@
   },
   {
     "uuid": "c47c6a7c-d819-4d71-a87b-a5c85ba5f765",
-    "keywords": [
-      "multi-turn",
-      "combo",
-      "p1"
-    ],
+    "keywords": ["multi-turn", "combo", "p1"],
+    "cart": { "items": [] },
     "turns": [
       {
         "query": "can I get a cheeseburger twofer",
@@ -75,11 +69,8 @@
   },
   {
     "uuid": "894206bb-923d-43a3-922a-7f909648fc2b",
-    "keywords": [
-      "single-turn",
-      "edit",
-      "p1"
-    ],
+    "keywords": ["single-turn", "edit", "p1"],
+    "cart": { "items": [] },
     "turns": [
       {
         "query": "i want a a grilled chicken and a fish burger and two cokes",
@@ -106,11 +97,8 @@
   },
   {
     "uuid": "adf6d0b5-e06c-4f33-a735-338918f10f51",
-    "keywords": [
-      "multi-turn",
-      "edit",
-      "p2"
-    ],
+    "keywords": ["multi-turn", "edit", "p2"],
+    "cart": { "items": [] },
     "turns": [
       {
         "query": "i want a a grilled chicken and a fish burger and two cokes",
@@ -165,6 +153,7 @@
   },
   {
     "uuid": "7ee4a8d5-6473-4864-a2c6-b8c221840411",
+    "cart": { "items": [] },
     "turns": [
       {
         "query": "can I a double wiseguy with no tomatoes and extra mayo",
@@ -172,7 +161,17 @@
           "items": [
             {
               "name": "Double Wiseguy",
-              "type": "CHOOSE"
+              "type": "CHOOSE",
+              "options": [
+                {
+                  "amount": "No",
+                  "name": "Tomato"
+                },
+                {
+                  "amount": "Extra",
+                  "name": "Mayo"
+                }
+              ]
             }
           ]
         }

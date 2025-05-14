@@ -21,7 +21,7 @@ type WiseguyMeal<SIZE extends ComboSizes> = {
   size: SIZE;
   sandwich: Wiseguy | CHOOSE;
   fries: FrenchFries<SIZE> | CHOOSE;
-  drink: ChooseDrink;
+  drink: ChooseDrink<SIZE>;
 };
 
 type Meal<SIZE extends ComboSizes> = {
@@ -37,7 +37,7 @@ type Meal<SIZE extends ComboSizes> = {
     | Fish
     | CHOOSE;
   fries: FrenchFries<SIZE> | CHOOSE;
-  drink: ChooseDrink;
+  drink: ChooseDrink<SIZE>;
 };
 
 type ComboTwo = {
@@ -64,7 +64,7 @@ type ComboThree = {
 type TwoThreeChoices =
   | Wiseguy
   | GenericChicken<"Grilled Chicken Sandwich">
-  | GenericBurger<LITERAL<"Bacon Cheeseburger", ["buger"], false>>
+  | GenericBurger<LITERAL<"Bacon Cheeseburger", ["burger"], false>>
   | FrenchFries<LITERAL<"Medium", [], true>>
   | OtherFries<
       LITERAL<"Jalapeño Poppers", [], true>,
@@ -182,7 +182,7 @@ type OtherFriesSizes = "6 Piece" | "12 Piece" | CHOOSE;
 
 type ComboSizes = "Small" | "Medium" | "Large" | CHOOSE;
 
-type ChooseDrink = FountainDrink<any, any> | CHOOSE;
+type ChooseDrink<SIZE extends DrinkSizes> = FountainDrink<any, SIZE> | CHOOSE;
 
 type FountainDrink<NAME extends DrinkNames, SIZE extends DrinkSizes> = {
   name: NAME;
@@ -259,7 +259,7 @@ type ExtraAmount = "No" | LITERAL<"Regular", [], true> | "extra";
 
 type Optional = "No" | LITERAL<"Regular", [], true>;
 
-// Hint: Use CHOOSE when customer doesn't specify an option
+// Hint: Use CHOOSE when customer doesn't specify an option and the option is not specified by a template literal
 type CHOOSE = LITERAL<"CHOOSE", [], true>;
 
 type LITERAL<NAME, ALIASES, IS_OPTIONAL> = NAME;

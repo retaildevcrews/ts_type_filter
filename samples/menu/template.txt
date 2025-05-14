@@ -6,4 +6,5 @@ The JSON should conform to the following typescript type definition for type `Ca
 {{menu}}
 ~~~
 
+Only use CHOOSE when the user didn't specify a choice and there is no template literal contraining the choise.
 Return the JSON object of type `Cart`.
