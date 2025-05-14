@@ -6,8 +6,9 @@ def flatten_cases(cases):
     cart = case["cart"]
     for index, turn in enumerate(case["turns"]):
       step = {
-        "uuid": f"{case['uuid']}-{index}",
+        "uuid": f"{case['uuid']}.{index:02}",
         "cart": cart,
+        "keywords": case["keywords"],
         "query": turn["query"],
         "expected": turn["expected"],
       }

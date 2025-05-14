@@ -91,16 +91,14 @@ class MenuPipeline(Pipeline):
         default_config = {
             "prepare": {
                 "compress": False,
+                "menu": "menu.ts",
                 "prune": True,
                 "template": "samples/menu/template.txt",
                 "template_text": Internal(),
-                # "template": Prompt("Template file for system message"),
-                # "template_text": Internal(),
             },
             "infer": {
                 "model": {
                     "name": "gpt4o",
-                    # "name": Prompt("Model name to use for inference stage"),
                     "settings": {
                         "max_tokens": 800,
                         "temperature": 0.7,
@@ -117,7 +115,7 @@ class MenuPipeline(Pipeline):
         # it is available for format().
         # Read the contents of menu.ts into a string.
         # Use utf8 because of terms like "jalapeño".
-        filename = "menu.ts"
+        filename = glom(self.config(), "prepare.menu")
         with open(filename, "r", encoding="utf-8") as file:
             menu_text = file.read()
 

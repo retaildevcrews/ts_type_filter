@@ -1,4 +1,4 @@
-# Inverted Index
+# Inverted Index Sample
 
 `ts_type_filter` uses a simple inverted index, written in Python.
 It includes a demo based on [154 Shakespeare sonnets](https://en.wikipedia.org/wiki/Shakespeare%27s_sonnets) obtained from [Project Gutenberg](https://www.gutenberg.org/ebooks/1041).

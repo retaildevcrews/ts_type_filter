@@ -7,7 +7,7 @@ In some scenarios, such as restaurant menus, the Typescript type definition may 
 
 For instance, if the customer is ordering a drink it is not necessary to include the types related to sandwiches.
 
-As an example, suppose we have a menu for a restaurant with a very small menu offering two sandwiches with some toppings, two sodas, and two juices:
+As an example, suppose we have a menu for a restaurant with a menu offering two sandwiches with some toppings, two sodas, and two juices:
 
 ~~~typescript
 type Items = Sandwiches | Drinks;

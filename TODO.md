@@ -1,20 +1,32 @@
 # TODO
 
 Top Top Top
-* ordering pipeline should get type defs from file
-  * filename should come from config
-* Failing case analysis
-  * 0e6 - ChooseDrink needs to be templated by SIZE
-  * c47 step 0 - Picked illegal Cheeseburger - prompt comment?
-  * c47 step 1 - Drink size in twofer is restricted to Medium. Should not be CHOOSE.
-  * 7ee - bad test case - expected value wrong
-* Flattener should copy keywords
-* Step number breaks uuid shortener
-* Replace junk.ts with menu.ts
-* Modify ordering.py to load menu.ts
-* Modify ordering.py to generate sub-result for each turn
+* Cleanup
+  * . Rename ordering2.py to ordering.py
+  * Rename gotag and gotag.bat?
+  * Move flatten_cases to gotaglio
+  * cases3.json, multi_turn_cases.json
+  * pipeline.ipynb - can we remove this?
+  * Rename ordering.ipynb to pipeline.ipynb
+  * put cases in data folder
+  * x junk1.txt, junk2.txt, junk.js, junk2.ts
+  * x cases.json, cases2.json
 * Make sure README.md is clear
 * Test a larger set of cases
+* Failing case analysis
+  * x 0e6 - ChooseDrink needs to be templated by SIZE
+  * c47 step 0 - Picked illegal Cheeseburger - prompt comment?
+  * x c47 step 1 - Drink size in twofer is restricted to Medium. Should not be CHOOSE.
+  * x 7ee - bad test case - expected value wrong
+* x Flattener should copy keywords
+* x Step number breaks uuid shortener
+* x Replace junk.ts with menu.ts
+* x Where are tomato emojis coming from? From :tomato:. Fixed in gotaglio.
+* x Modify ordering.py to load menu.ts
+* x Modify ordering.py to generate sub-result for each turn
+* x uuid.step id prefixing
+* x ordering pipeline should get type defs from file
+  * x filename should come from config
 
 Top Top
 * Compare of perfect and flakey shows all failures

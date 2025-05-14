@@ -6,5 +6,7 @@ The JSON should conform to the following typescript type definition for type `Ca
 {{menu}}
 ~~~
 
-Only use CHOOSE when the user didn't specify a choice and there is no template literal contraining the choise.
-Return the JSON object of type `Cart`.
+* Only use CHOOSE when the user didn't specify a choice and there is no template literal contraining the choice.
+* If request doesn't match the schema exactly, choose the closest matching item that is strictly legal for the schema.
+* Combos that don't specify enough items should use CHOOSE instead of duplicating an item.
+* Return the JSON object of type `Cart`.
