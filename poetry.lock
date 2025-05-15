@@ -549,7 +549,7 @@ tiktoken = ">=0.9.0,<0.10.0"
 type = "git"
 url = "https://github.com/MikeHopcroft/gotaglio"
 reference = "HEAD"
-resolved_reference = "d82b97793ed1be7a8071f7dbb9bb2f28fed6fc6d"
+resolved_reference = "b5a0b5ca4c27e751c8aaa97af42fc19f8dd3882d"
 
 [[package]]
 name = "h11"

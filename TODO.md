@@ -1,13 +1,19 @@
 # TODO
 
 Top Top Top
+* Incorporate nest_async into Gotaglio?
 * Cleanup
-  * . Rename ordering2.py to ordering.py
   * Rename gotag and gotag.bat?
+  * Rename simple.ipynb to api.ipynb?
+  * gotag and gotag.bat access nonexistant ordering.py
+  * . Rename ordering2.py to ordering.py
+  * debug.py
+  * filter.py
   * Move flatten_cases to gotaglio
   * cases3.json, multi_turn_cases.json
   * pipeline.ipynb - can we remove this?
   * Rename ordering.ipynb to pipeline.ipynb
+  * gotag.md in samples/menu
   * put cases in data folder
   * x junk1.txt, junk2.txt, junk.js, junk2.ts
   * x cases.json, cases2.json

@@ -50,7 +50,7 @@ This filtered menu uses only 47 tokens. The potential savings due to filtering i
 ## Sample Applications
 
 `ts_type_filter` includes four samples:
-* [simple.ipynb](./samples/menu/simple.ipynb) - notebook demonstrates `ts_type_filter` api usage.
+* [filtering_api.ipynb](./samples/menu/simple.ipynb) - notebook demonstrates `ts_type_filter` api usage.
 * [pipeline.ipynb](./samples/menu/pipeline.ipynb) - notebook demonstrates a
 [Gotaglio](https://github.com/MikeHopcroft/gotaglio) pipeline that uses
 `ts-type-filter` to optimize LLM prompts for a ficticious restaurant ordering bot.

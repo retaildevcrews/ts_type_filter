@@ -53,7 +53,7 @@ class MenuPipeline(Pipeline):
     # These are used by the Registry to list and instantiate pipelines.
     # The `pipelines` subcommand will print a list of available pipelines,
     # with their names and descriptions.
-    _name = "menu2"
+    _name = "menu"
     _description = "An example pipeline for an LLM-based food ordering bot."
 
     def __init__(self, registry, replacement_config, flat_config_patch):
