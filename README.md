@@ -47,6 +47,30 @@ This filtered menu uses only 47 tokens. The potential savings due to filtering i
 
 `ts_type_filter` provides an algorithm to prune TypeScript type definitions based an a set of keywords. The algorithm first parses the TypeScript into an abstract syntax tree. It then builds an inverted index of the terms in the string type literals, and this index is used to prune the type definitions, based on the current contents of the shopping cart and the customer's request. You can learn more about the inverted index [here](./documentation/inverted-index.md).
 
+## Installation
+
+### From PyPI (when available)
+```bash
+pip install ts_type_filter
+```
+
+### From GitHub (recommended for now)
+```bash
+pip install git+https://github.com/MikeHopcroft/ts_type_filter.git
+```
+
+### Using Poetry
+```bash
+poetry add git+https://github.com/MikeHopcroft/ts_type_filter.git
+```
+
+### Development Installation
+```bash
+git clone https://github.com/MikeHopcroft/ts_type_filter.git
+cd ts_type_filter
+poetry install
+```
+
 ## Sample Applications
 
 `ts_type_filter` includes four samples:

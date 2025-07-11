@@ -3,6 +3,18 @@ name = "ts_type_filter"
 version = "0.1.0"
 description = "Experimental library to assist in preparing Typescript type definitions for use in Large Language Model (LLM) prompts."
 authors = ["Michael Hopcroft <mhop@microsoft.com>"]
+readme = "README.md"
+homepage = "https://github.com/MikeHopcroft/ts_type_filter"
+repository = "https://github.com/MikeHopcroft/ts_type_filter"
+keywords = ["typescript", "llm", "type-definitions", "parsing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+packages = [{include = "ts_type_filter"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12"
