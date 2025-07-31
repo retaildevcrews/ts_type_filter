@@ -1,5 +1,14 @@
-from nltk.stem.snowball import SnowballStemmer
 import re
+
+# Lazy initialization to avoid import cost
+_default_stemmer = None
+
+def get_default_stemmer():
+    global _default_stemmer
+    if _default_stemmer is None:
+        from nltk.stem.snowball import SnowballStemmer
+        _default_stemmer = SnowballStemmer("english")
+    return _default_stemmer
 
 def nop_extractor(document):
   """
@@ -27,7 +36,7 @@ class Index:
   def __init__(self, extractor=None, breaker=None, stemmer=None):
     self._extractor = extractor or nop_extractor
     self._breaker = breaker or break_on_whitespace
-    self._stemmer = stemmer or SnowballStemmer("english")
+    self._stemmer = stemmer or get_default_stemmer()
 
     # Initialize the index data structures
     self._documents_in_order = []

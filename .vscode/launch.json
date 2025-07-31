@@ -21,6 +21,22 @@
       ]
     },
     {
+      "name": "menu_pipeline2",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "samples/menu/menu_pipeline2.py",
+      "console": "integratedTerminal",
+      // "justMyCode": false,
+      "args": [
+        "run",
+        "menu2",
+        "samples/menu/data/cases.json",
+        "infer.model.name=perfect"
+        // "format",
+        // "9bfc"
+      ]
+    },
+    {
       "name": "parse",
       "type": "debugpy",
       "request": "launch",
