@@ -3,11 +3,11 @@
 This is an experimental library to assist in preparing Typescript type definitions for use in Large Language Model (LLM) prompts.
 We've seen from projects like [TypeChat](https://github.com/microsoft/TypeChat) that TypeScript type definitions are a good way to communicate the desired output schema in an LLM prompt.
 
-In some scenarios, such as restaurant menus, the Typescript type definition may be long, and it may be desireable to work with a subset of the type definition that specifies only the types needed for the current term.
+In some scenarios, such as restaurant menus, the Typescript type definition may be long, and it may be desirable to work with a subset of the type definition that specifies only the types needed for the current turn in the conversation.
 
 For instance, if the customer is ordering a drink it is not necessary to include the types related to sandwiches.
 
-As an example, suppose we have a menu for a restaurant with a menu offering two sandwiches with some toppings, two sodas, and two juices:
+More concretely, suppose we have a menu for a restaurant with a menu offering two sandwiches with some toppings, two sodas, and two juices:
 
 ~~~typescript
 type Items = Sandwiches | Drinks;
@@ -45,7 +45,8 @@ type SandwichOptions = { name: "tomato"; amount: "no" };
 This filtered menu uses only 47 tokens. The potential savings due to filtering is much more signifant for a large menu.
 
 
-`ts_type_filter` provides an algorithm to prune TypeScript type definitions based an a set of keywords. The algorithm first parses the TypeScript into an abstract syntax tree. It then builds an inverted index of the terms in the string type literals, and this index is used to prune the type definitions, based on the current contents of the shopping cart and the customer's request. You can learn more about the inverted index [here](./documentation/inverted-index.md).
+`ts_type_filter` provides an algorithm to prune TypeScript type definitions based an a set of keywords. The algorithm first parses the TypeScript into an abstract syntax tree. It then builds an inverted index of the terms in the string type literals, and this index is used to prune the type definitions, based on the current contents of the shopping cart and the customer's request.
+We invite you to read more about the [pruning algorithm](./documentation/algorithm.md) and the [inverted index](./documentation/inverted-index.md).
 
 ## Installation
 
@@ -74,11 +75,11 @@ poetry install
 ## Sample Applications
 
 `ts_type_filter` includes four samples:
-* [filtering_api.ipynb](./samples/menu/simple.ipynb) - notebook demonstrates `ts_type_filter` api usage.
-* [pipeline.ipynb](./samples/menu/pipeline.ipynb) - notebook demonstrates a
+* [filtering_api.ipynb](./samples/menu/filtering_api.ipynb) - notebook demonstrates `ts_type_filter` api usage.
+* [menu.ipynb](./samples/menu/menu.ipynb) - notebook demonstrates a
 [Gotaglio](https://github.com/MikeHopcroft/gotaglio) pipeline that uses
 `ts-type-filter` to optimize LLM prompts for a ficticious restaurant ordering bot.
-* [gotag cli](./samples/menu/gotag.md) - shell script that runs the pipeline.
+* [menu cli](./samples/menu/gotag.md) - shell script that runs the menu pipeline.
 * [query cli](./samples/inverted_index/query.md) - shell script demonstrates inverted index of Shakespear sonnets.
 
 You need a properly configured development to run the samples.

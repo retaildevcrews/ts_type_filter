@@ -1,0 +1,2 @@
+#!/bin/bash
+python samples/menu/menu_pipeline.py "$@"

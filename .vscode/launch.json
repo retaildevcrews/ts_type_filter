@@ -5,16 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ordering",
+      "name": "menu_pipeline",
       "type": "debugpy",
       "request": "launch",
-      "program": "samples/menu/ordering.py",
+      "program": "samples/menu/menu_pipeline.py",
       "console": "integratedTerminal",
       // "justMyCode": false,
       "args": [
         "run",
         "menu",
-        "samples\\menu\\cases2.json",
+        "samples/menu/data/cases.json",
         "infer.model.name=perfect"
         // "format",
         // "9bfc"
@@ -26,7 +26,6 @@
       "request": "launch",
       "program": "ts_type_filter/ts_parser2.py",
       "console": "integratedTerminal",
-      ]
     },
     {
       "name": "menu",

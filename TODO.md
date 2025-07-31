@@ -1,20 +1,22 @@
 # TODO
 
 Top Top Top
-* Incorporate nest_async into Gotaglio?
+* x Incorporate nest_async into Gotaglio?
+* prepare.menu path needs to be different in CLI than notebook.
 * Cleanup
+  * Move flatten_cases to gotaglio
+  * x cases3.json, multi_turn_cases.json
+  * gotag.md in samples/menu
   * Rename gotag and gotag.bat?
   * Rename simple.ipynb to api.ipynb?
   * gotag and gotag.bat access nonexistant ordering.py
-  * . Rename ordering2.py to ordering.py
-  * debug.py
-  * filter.py
-  * Move flatten_cases to gotaglio
-  * cases3.json, multi_turn_cases.json
-  * pipeline.ipynb - can we remove this?
-  * Rename ordering.ipynb to pipeline.ipynb
-  * gotag.md in samples/menu
-  * put cases in data folder
+  * to_ts.py
+  * x Rename ordering2.py to ordering.py to menu_pipeline.py
+  * x debug.py
+  * X filter.py
+  * x pipeline.ipynb - can we remove this?
+  * x Rename ordering.ipynb to pipeline.ipynb
+  * x put cases in data folder
   * x junk1.txt, junk2.txt, junk.js, junk2.ts
   * x cases.json, cases2.json
 * Make sure README.md is clear

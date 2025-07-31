@@ -91,9 +91,9 @@ class MenuPipeline(Pipeline):
         default_config = {
             "prepare": {
                 "compress": False,
-                "menu": "menu.ts",
+                "menu": "samples/menu/data/menu.ts",
                 "prune": True,
-                "template": "samples/menu/template.txt",
+                "template": "samples/menu/data/template.txt",
                 "template_text": Internal(),
             },
             "infer": {
