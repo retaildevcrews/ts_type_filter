@@ -79,7 +79,7 @@ type TwoThreeChoices =
     >
   | CHOOSE;
 
-  type Wiseguy = GenericWiseguy<
+type Wiseguy = GenericWiseguy<
   | "Wiseguy"
   | "Vegan Wiseguy"
   | "Double Wiseguy"
@@ -176,7 +176,11 @@ type FrenchFrySizes = "Value" | "Small" | "Medium" | "Large" | CHOOSE;
 type OtherFries<
   NAME extends "Jalapeño Poppers" | "Mozzarella Sticks",
   SIZE extends OtherFriesSizes
-> = { name: NAME; size: SIZE; sauce: DippingSauce | CHOOSE };
+> = {
+  name: NAME;
+  size: SIZE;
+  sauce: DippingSauce | CHOOSE;
+};
 
 type OtherFriesSizes = "6 Piece" | "12 Piece" | CHOOSE;
 

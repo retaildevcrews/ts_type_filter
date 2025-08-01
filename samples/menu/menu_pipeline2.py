@@ -44,10 +44,8 @@ from ts_type_filter import (
     collect_string_literals,
     build_type_index,
     build_filtered_types,
-    parse
+    parse,
 )
-
-# from menu import type_defs
 
 
 class MenuPipeline2(Pipeline):
@@ -93,9 +91,9 @@ class MenuPipeline2(Pipeline):
         default_config = {
             "prepare": {
                 "compress": False,
-                "menu": "samples/menu/data/menu.ts",
+                "menu": "data/menu.ts",
                 "prune": True,
-                "template": "samples/menu/data/template.txt",
+                "template": "data/template.txt",
                 "template_text": Internal(),
             },
             "infer": {
@@ -147,8 +145,6 @@ class MenuPipeline2(Pipeline):
             "prepare.template_text",
         )
 
-
-        # Make this lazy - it is lazy - will not run unless stages() is called.
         symbols, indexer = build_type_index(self.type_defs)
 
         # Instantiate the model for the `infer` stage.
@@ -173,7 +169,6 @@ class MenuPipeline2(Pipeline):
         has completed with a return value. 
         """
 
-
         # Create the system and user messages
         async def prepare(context):
             # Prune the menu based on terms in the query and the cart
@@ -181,7 +176,9 @@ class MenuPipeline2(Pipeline):
             cart = context["case"]["cart"]
             cart_literals = collect_string_literals(cart)
             full_query = [user_query] + cart_literals
-            reachable = build_filtered_types(self.type_defs, symbols, indexer, full_query)
+            reachable = build_filtered_types(
+                self.type_defs, symbols, indexer, full_query
+            )
             compress = (
                 str(glom(self.config(), "prepare.compress", default=False)) == "True"
             )
@@ -195,15 +192,6 @@ class MenuPipeline2(Pipeline):
                 {"role": "system", "content": await template({"menu": pruned})},
                 {"role": "assistant", "content": json.dumps(cart, indent=2)},
             ]
-            # case = context["case"]
-            # for c in case["turns"][:-1]:
-            #     messages.append({"role": "user", "content": c["query"]})
-            #     messages.append(
-            #         {
-            #             "role": "assistant",
-            #             "content": json.dumps(c["expected"], indent=2),
-            #         }
-            #     )
             messages.append({"role": "user", "content": context["case"]["query"]})
 
             return {
@@ -242,9 +230,9 @@ class MenuPipeline2(Pipeline):
             {"name": "prepare", "function": prepare, "inputs": []},
             {"name": "infer", "function": infer, "inputs": ["prepare"]},
             {"name": "extract", "function": extract, "inputs": ["infer"]},
-            {"name": "assess", "function": assess, "inputs": ["extract"]}
+            {"name": "assess", "function": assess, "inputs": ["extract"]},
         ]
-        
+
         # Build the sub-DAG once (pulled out of loop)
         turn_dag = build_dag_from_spec(turn_spec)
 
@@ -254,7 +242,6 @@ class MenuPipeline2(Pipeline):
             results = []
             for index, turn in enumerate(case["turns"]):
                 turn_case = {
-                    # "uuid": f"{case['uuid']}.{index:02}",
                     "cart": cart,
                     "query": turn["query"],
                     "expected": turn["expected"],
@@ -308,7 +295,9 @@ class MenuPipeline2(Pipeline):
             for result in results:
                 for index, turn_result in enumerate(result["stages"]["turns"]):
                     succeeded = turn_result["succeeded"]
-                    cost = turn_result["stages"]["assess"]["cost"] if succeeded else None
+                    cost = (
+                        turn_result["stages"]["assess"]["cost"] if succeeded else None
+                    )
 
                     if succeeded:
                         complete_count += 1
@@ -336,7 +325,10 @@ class MenuPipeline2(Pipeline):
                         else ""
                     )
                     table.add_row(
-                        f"{short_id(result['case']['uuid'])}.{index:02}", complete, score, keywords
+                        f"{short_id(result['case']['uuid'])}.{index:02}",
+                        complete,
+                        score,
+                        keywords,
                     )
 
             # Display the table and the totals.
@@ -387,23 +379,27 @@ class MenuPipeline2(Pipeline):
             for result in results:
                 if uuid_prefix and not result["case"]["uuid"].startswith(uuid_prefix):
                     continue
-                console.print(f"## Case: {short_id(result['case']['uuid'])}")
+                turn_count = f" ({len(result['stages']['turns'])} turn{'s' if len(result['stages']['turns']) != 1 else ''})"
+                console.print(f"## Case: {short_id(result['case']['uuid'])}{turn_count}")
+                console.print(
+                    f"**Keywords:** {', '.join(result['case'].get('keywords', []))}  "
+                )
+                console.print()
+
                 for index, turn_result in enumerate(result["stages"]["turns"]):
+                    if index > 0:
+                        console.print("---")
+                    else:
+                        console.print()
                     if turn_result["succeeded"]:
                         cost = turn_result["stages"]["assess"]["cost"]
                         if cost == 0:
-                            console.print("**PASSED**  ")
+                            console.print(f"### Turn {index + 1}: **PASSED**  ")
                         else:
-                            console.print(f"**FAILED:** cost={cost}  ")
-                            # print(
-                            #     f"**FAILED**: expected\n~~~json\n{json.dumps(result['case']["turns"][-1]['expected'], indent=2)}\n~~~\n\n"
-                            # )
-                        # print(result["case"]["comment"])
+                            console.print(
+                                f"### Turn {index + 1}: **FAILED:** cost={cost}  "
+                            )
                         console.print()
-
-                        console.print(
-                            f"Keywords: {', '.join(turn_result['case'].get('keywords', []))}  "
-                        )
 
                         input_tokens = sum(
                             len(self._tokenizer.encode(message["content"]))
@@ -412,7 +408,7 @@ class MenuPipeline2(Pipeline):
                         console.print(f"Complete menu tokens: {complete_tokens}  ")
                         console.print(
                             f"Input tokens: {input_tokens}, output tokens: {len(self._tokenizer.encode(turn_result['stages']['infer']))}"
-                        ) 
+                        )
                         console.print()
 
                         for x in turn_result["stages"]["prepare"]["messages"]:
@@ -426,7 +422,9 @@ class MenuPipeline2(Pipeline):
                             console.print()
                         console.print(f"**assistant:**")
                         console.print("```json")
-                        console.print(json.dumps(turn_result["stages"]["extract"], indent=2))
+                        console.print(
+                            json.dumps(turn_result["stages"]["extract"], indent=2)
+                        )
                         console.print("```")
                         console.print()
 
@@ -438,16 +436,18 @@ class MenuPipeline2(Pipeline):
                             console.print("**No repairs**")
 
                         console.print()
-                        console.print("**Full query**:")
+                        console.print("**Pruning query**:")
                         for x in turn_result["stages"]["prepare"]["full_query"]:
                             console.print(f"* {x}")
                         console.print()
 
                     else:
-                        console.print("**ERROR**  ")
+                        console.print(f"### Turn {index + 1}: **ERROR**  ")
                         console.print(f"Error: {turn_result['exception']['message']}")
                         console.print("~~~")
-                        console.print(f"Traceback: {turn_result['exception']['traceback']}")
+                        console.print(
+                            f"Traceback: {turn_result['exception']['traceback']}"
+                        )
                         console.print(f"Time: {turn_result['exception']['time']}")
                         console.print("~~~")
 
