@@ -1,4 +1,4 @@
 @echo off
 pushd samples\menu
-python menu_pipeline2.py %*
+python menu_pipeline.py %*
 popd

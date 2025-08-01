@@ -30,6 +30,8 @@ import tiktoken
 # gotaglio package, as if it had been installed.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
+from gotaglio.dag import build_dag_from_spec
+from gotaglio.director import process_one_case
 from gotaglio.exceptions import ExceptionContext
 from gotaglio.helpers import IdShortener
 from gotaglio.main import main
@@ -42,10 +44,8 @@ from ts_type_filter import (
     collect_string_literals,
     build_type_index,
     build_filtered_types,
-    parse
+    parse,
 )
-
-# from menu import type_defs
 
 
 class MenuPipeline(Pipeline):
@@ -120,8 +120,8 @@ class MenuPipeline(Pipeline):
             menu_text = file.read()
 
         # Parse the TypeScript type definitions
+        # TODO: make this lazy.
         self.type_defs = parse(menu_text)
-
 
         # Save registry here for later use in the stages() method.
         self._registry = registry
@@ -176,7 +176,9 @@ class MenuPipeline(Pipeline):
             cart = context["case"]["cart"]
             cart_literals = collect_string_literals(cart)
             full_query = [user_query] + cart_literals
-            reachable = build_filtered_types(self.type_defs, symbols, indexer, full_query)
+            reachable = build_filtered_types(
+                self.type_defs, symbols, indexer, full_query
+            )
             compress = (
                 str(glom(self.config(), "prepare.compress", default=False)) == "True"
             )
@@ -190,15 +192,6 @@ class MenuPipeline(Pipeline):
                 {"role": "system", "content": await template({"menu": pruned})},
                 {"role": "assistant", "content": json.dumps(cart, indent=2)},
             ]
-            # case = context["case"]
-            # for c in case["turns"][:-1]:
-            #     messages.append({"role": "user", "content": c["query"]})
-            #     messages.append(
-            #         {
-            #             "role": "assistant",
-            #             "content": json.dumps(c["expected"], indent=2),
-            #         }
-            #     )
             messages.append({"role": "user", "content": context["case"]["query"]})
 
             return {
@@ -232,14 +225,43 @@ class MenuPipeline(Pipeline):
             expected = repair.addIds(context["case"]["expected"]["items"])
             return repair.diff(observed, expected)
 
+        # Define the sub-pipeline spec once (pulled out of loop)
+        turn_spec = [
+            {"name": "prepare", "function": prepare, "inputs": []},
+            {"name": "infer", "function": infer, "inputs": ["prepare"]},
+            {"name": "extract", "function": extract, "inputs": ["infer"]},
+            {"name": "assess", "function": assess, "inputs": ["extract"]},
+        ]
+
+        # Build the sub-DAG once (pulled out of loop)
+        turn_dag = build_dag_from_spec(turn_spec)
+
+        async def turns(context):
+            case = context["case"]
+            cart = case["cart"]
+            results = []
+            for index, turn in enumerate(case["turns"]):
+                turn_case = {
+                    "cart": cart,
+                    "query": turn["query"],
+                    "expected": turn["expected"],
+                }
+                result = await process_one_case(turn_case, turn_dag, None)
+
+                cart = result["stages"]["extract"]
+                results.append(result)
+
+            return results
+
         # The pipeline stages will be executed in the order specified in the
         # dictionary returned by the stages() method. The keys of the
         # dictionary are the names of the stages.
         return {
-            "prepare": prepare,
-            "infer": infer,
-            "extract": extract,
-            "assess": assess,
+            "turns": turns,
+            # "prepare": prepare,
+            # "infer": infer,
+            # "extract": extract,
+            # "assess": assess,
         }
 
     # This method is used to summarize the results of each a pipeline run.
@@ -271,37 +293,43 @@ class MenuPipeline(Pipeline):
 
             # Add one row for each case.
             for result in results:
-                succeeded = result["succeeded"]
-                cost = result["stages"]["assess"]["cost"] if succeeded else None
+                for index, turn_result in enumerate(result["stages"]["turns"]):
+                    succeeded = turn_result["succeeded"]
+                    cost = (
+                        turn_result["stages"]["assess"]["cost"] if succeeded else None
+                    )
 
-                if succeeded:
-                    complete_count += 1
-                    if cost == 0:
-                        passed_count += 1
+                    if succeeded:
+                        complete_count += 1
+                        if cost == 0:
+                            passed_count += 1
+                        else:
+                            failed_count += 1
                     else:
-                        failed_count += 1
-                else:
-                    error_count += 1
+                        error_count += 1
 
-                complete = (
-                    Text("COMPLETE", style="bold green")
-                    if succeeded
-                    else Text("ERROR", style="bold red")
-                )
-                cost_text = "" if cost == None else f"{cost:.2f}"
-                score = (
-                    Text(cost_text, style="bold green")
-                    if cost == 0
-                    else Text(cost_text, style="bold red")
-                )
-                keywords = (
-                    ", ".join(sorted(result["case"]["keywords"]))
-                    if "keywords" in result["case"]
-                    else ""
-                )
-                table.add_row(
-                    short_id(result["case"]["uuid"]), complete, score, keywords
-                )
+                    complete = (
+                        Text("COMPLETE", style="bold green")
+                        if succeeded
+                        else Text("ERROR", style="bold red")
+                    )
+                    cost_text = "" if cost == None else f"{cost:.2f}"
+                    score = (
+                        Text(cost_text, style="bold green")
+                        if cost == 0
+                        else Text(cost_text, style="bold red")
+                    )
+                    keywords = (
+                        ", ".join(sorted(turn_result["case"]["keywords"]))
+                        if "keywords" in turn_result["case"]
+                        else ""
+                    )
+                    table.add_row(
+                        f"{short_id(result['case']['uuid'])}.{index:02}",
+                        complete,
+                        score,
+                        keywords,
+                    )
 
             # Display the table and the totals.
             console.print(table)
@@ -351,68 +379,77 @@ class MenuPipeline(Pipeline):
             for result in results:
                 if uuid_prefix and not result["case"]["uuid"].startswith(uuid_prefix):
                     continue
-                console.print(f"## Case: {short_id(result['case']['uuid'])}")
-                if result["succeeded"]:
-                    cost = result["stages"]["assess"]["cost"]
-                    if cost == 0:
-                        console.print("**PASSED**  ")
+                turn_count = f" ({len(result['stages']['turns'])} turn{'s' if len(result['stages']['turns']) != 1 else ''})"
+                console.print(f"## Case: {short_id(result['case']['uuid'])}{turn_count}")
+                console.print(
+                    f"**Keywords:** {', '.join(result['case'].get('keywords', []))}  "
+                )
+                console.print()
+
+                for index, turn_result in enumerate(result["stages"]["turns"]):
+                    if index > 0:
+                        console.print("---")
                     else:
-                        console.print(f"**FAILED:** cost={cost}  ")
-                        # print(
-                        #     f"**FAILED**: expected\n~~~json\n{json.dumps(result['case']["turns"][-1]['expected'], indent=2)}\n~~~\n\n"
-                        # )
-                    # print(result["case"]["comment"])
-                    console.print()
-
-                    console.print(
-                        f"Keywords: {', '.join(result['case'].get('keywords', []))}  "
-                    )
-
-                    input_tokens = sum(
-                        len(self._tokenizer.encode(message["content"]))
-                        for message in result["stages"]["prepare"]["messages"]
-                    )
-                    console.print(f"Complete menu tokens: {complete_tokens}  ")
-                    console.print(
-                        f"Input tokens: {input_tokens}, output tokens: {len(self._tokenizer.encode(result['stages']['infer']))}"
-                    )
-                    console.print()
-
-                    for x in result["stages"]["prepare"]["messages"]:
-                        if x["role"] == "assistant" or x["role"] == "system":
-                            console.print(f"**{x['role']}:**")
-                            console.print("```json")
-                            console.print(x["content"])
-                            console.print("```")
-                        elif x["role"] == "user":
-                            console.print(f"**{x['role']}:** _{x['content']}_")
                         console.print()
-                    console.print(f"**assistant:**")
-                    console.print("```json")
-                    console.print(json.dumps(result["stages"]["extract"], indent=2))
-                    console.print("```")
-                    console.print()
+                    if turn_result["succeeded"]:
+                        cost = turn_result["stages"]["assess"]["cost"]
+                        if cost == 0:
+                            console.print(f"### Turn {index + 1}: **PASSED**  ")
+                        else:
+                            console.print(
+                                f"### Turn {index + 1}: **FAILED:** cost={cost}  "
+                            )
+                        console.print()
 
-                    if cost > 0:
-                        console.print("**Repairs:**")
-                        for step in result["stages"]["assess"]["steps"]:
-                            console.print(f"* {step}")
+                        input_tokens = sum(
+                            len(self._tokenizer.encode(message["content"]))
+                            for message in turn_result["stages"]["prepare"]["messages"]
+                        )
+                        console.print(f"Complete menu tokens: {complete_tokens}  ")
+                        console.print(
+                            f"Input tokens: {input_tokens}, output tokens: {len(self._tokenizer.encode(turn_result['stages']['infer']))}"
+                        )
+                        console.print()
+
+                        for x in turn_result["stages"]["prepare"]["messages"]:
+                            if x["role"] == "assistant" or x["role"] == "system":
+                                console.print(f"**{x['role']}:**")
+                                console.print("```json")
+                                console.print(x["content"])
+                                console.print("```")
+                            elif x["role"] == "user":
+                                console.print(f"**{x['role']}:** _{x['content']}_")
+                            console.print()
+                        console.print(f"**assistant:**")
+                        console.print("```json")
+                        console.print(
+                            json.dumps(turn_result["stages"]["extract"], indent=2)
+                        )
+                        console.print("```")
+                        console.print()
+
+                        if cost > 0:
+                            console.print("**Repairs:**")
+                            for step in turn_result["stages"]["assess"]["steps"]:
+                                console.print(f"* {step}")
+                        else:
+                            console.print("**No repairs**")
+
+                        console.print()
+                        console.print("**Pruning query**:")
+                        for x in turn_result["stages"]["prepare"]["full_query"]:
+                            console.print(f"* {x}")
+                        console.print()
+
                     else:
-                        console.print("**No repairs**")
-
-                    console.print()
-                    console.print("**Full query**:")
-                    for x in result["stages"]["prepare"]["full_query"]:
-                        console.print(f"* {x}")
-                    console.print()
-
-                else:
-                    console.print("**ERROR**  ")
-                    console.print(f"Error: {result['exception']['message']}")
-                    console.print("~~~")
-                    console.print(f"Traceback: {result['exception']['traceback']}")
-                    console.print(f"Time: {result['exception']['time']}")
-                    console.print("~~~")
+                        console.print(f"### Turn {index + 1}: **ERROR**  ")
+                        console.print(f"Error: {turn_result['exception']['message']}")
+                        console.print("~~~")
+                        console.print(
+                            f"Traceback: {turn_result['exception']['traceback']}"
+                        )
+                        console.print(f"Time: {turn_result['exception']['time']}")
+                        console.print("~~~")
 
     def compare(self, make_console, a, b):
         console = make_console("text/plain")
