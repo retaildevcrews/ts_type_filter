@@ -1,6 +1,12 @@
 # TODO
 
 Top Top Top
+* Parse errors
+  * Comments inside definitions
+  * Comments to the right of text
+  * Type `never`
+  * Type `string`
+  * Type `number`
 * x Incorporate nest_async into Gotaglio?
 * prepare.menu path needs to be different in CLI than notebook.
 * Cleanup
