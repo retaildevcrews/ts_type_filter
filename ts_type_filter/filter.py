@@ -182,6 +182,69 @@ class TrueNode(Node):
 TrueValue = TrueNode()
 
 
+class StringNode(Node):
+    def __init__(self, pinned=True):
+        pass
+
+    def format(self):
+        return "string"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+
+String = StringNode()
+
+
+class NumberNode(Node):
+    def __init__(self, pinned=True):
+        pass
+
+    def format(self):
+        return "number"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+
+Number = NumberNode()
+
+
+class BooleanNode(Node):
+    def __init__(self, pinned=True):
+        pass
+
+    def format(self):
+        return "boolean"
+
+    def index(self, symbols, indexer):
+        pass
+
+    def filter(self, nodes):
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        pass
+
+
+Boolean = BooleanNode()
+
+
 class Array(Node):
     def __init__(self, type):
         self.type = type
@@ -459,6 +522,12 @@ def build_symbol_table(nodes):
     symbols.add("any", Any)
     symbols.add("false", FalseValue)
     symbols.add("true", TrueValue)
+    # Add built-in TypeScript primitive types
+    symbols.add("string", String)
+    symbols.add("number", Number)
+    symbols.add("boolean", Boolean)
+    # Note: 'never' is already implemented as the Never class
+    symbols.add("never", Never())
     return symbols
 
 
@@ -475,6 +544,11 @@ def build_type_index(type_defs):
 
     # TODO: BUGBUG: is this necessary?
     Any.index(symbols, indexer)
+    
+    # Index built-in types so they're searchable
+    String.index(symbols, indexer)
+    Number.index(symbols, indexer)
+    Boolean.index(symbols, indexer)
 
     return symbols, indexer
 

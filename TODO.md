@@ -7,6 +7,9 @@ Top Top Top
   * Type `never`
   * Type `string`
   * Type `number`
+* Are string, number, boolean, never and any implemented with the same pattern?
+  * Is any indexed?
+  * Why use never() instead of an alias?
 * x Incorporate nest_async into Gotaglio?
 * prepare.menu path needs to be different in CLI than notebook.
 * Cleanup
