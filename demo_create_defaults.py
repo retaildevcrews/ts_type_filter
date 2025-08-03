@@ -6,7 +6,7 @@ including unions, type references, and optional fields.
 """
 
 from ts_type_filter import Define, Struct, Union, Literal, Type
-from ts_type_filter.create_defaults import create_defaults
+from ts_type_filter.normalize import create_normalizer_spec
 
 
 def demo_create_defaults():
@@ -83,7 +83,9 @@ def demo_create_defaults():
     
     # Call the function
     print("Processing type definitions...")
-    name_to_type, type_to_defaults = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
     
     # Display results
     print("\n" + "=" * 40)
@@ -198,8 +200,14 @@ def demo_duplicate_detection():
     print('The literal "duplicate" appears in both types.')
     
     try:
-        name_to_type, type_to_defaults = create_defaults(type_defs_with_duplicates)
-        print("❌ Should have detected duplicates!")
+        result = create_normalizer_spec(type_defs_with_duplicates)
+        name_to_type = result["types"]
+        type_to_defaults = result["defaults"]
+        duplicates = result["duplicates"]
+        if duplicates:
+            print(f"✅ Duplicates detected: {duplicates}")
+        else:
+            print("❌ Should have detected duplicates!")
     except ValueError as e:
         print(f"✅ Correctly detected duplicates: {e}")
 

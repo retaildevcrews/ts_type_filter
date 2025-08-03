@@ -6,7 +6,7 @@ to extract the default structure information.
 """
 
 from ts_type_filter import parse
-from ts_type_filter.create_defaults import create_defaults
+from ts_type_filter.normalize import create_normalizer_spec
 
 
 def test_integration_with_parser():
@@ -52,7 +52,9 @@ def test_integration_with_parser():
     
     # Use create_defaults
     print("\nApplying create_defaults...")
-    name_to_type, type_to_defaults = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
     
     # Display results
     print("\nResults:")
@@ -136,7 +138,9 @@ def test_complex_typescript():
     type_defs = parse(complex_typescript)
     
     print("\nApplying create_defaults...")
-    name_to_type, type_to_defaults = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
     
     print("\nResults:")
     print("Name mappings:")

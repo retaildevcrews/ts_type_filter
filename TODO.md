@@ -1,6 +1,11 @@
 # TODO
 
 Top Top Top
+* Normalizer
+  * create_normalizer_spec()
+  * create_normalizer()
+  * merge_normalizer_specs()
+* Pydantic
 * Parse errors
   * Comments inside definitions
   * Comments to the right of text

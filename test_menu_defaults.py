@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "samples", "menu"))
 
-from ts_type_filter.create_defaults import create_defaults
+from ts_type_filter.normalize import create_normalizer_spec
 
 def test_with_menu_data():
     """Test with actual menu type definitions."""
@@ -20,7 +20,10 @@ def test_with_menu_data():
         from samples.menu.menu_typedefs import type_defs
         
         # Run create_defaults on the menu data
-        name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+        result = create_normalizer_spec(type_defs)
+        name_to_type = result["types"]
+        type_to_defaults = result["defaults"]
+        duplicates = result["duplicates"]
         
         print(f"Found {len(name_to_type)} name mappings")
         print(f"Found {len(type_to_defaults)} types with optional fields")

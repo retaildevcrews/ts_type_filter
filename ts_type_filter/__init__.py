@@ -1,4 +1,4 @@
-from .create_defaults import create_defaults
+from .normalize import create_normalizer, create_normalizer_spec
 from .inverted_index import Index
 from .filter import (
     Any,
@@ -15,7 +15,6 @@ from .filter import (
     Type,
     Union,
 )
-from .normalize import normalize
 from .parser import (
     parse,
 )
@@ -26,12 +25,13 @@ __all__ = [
     "build_filtered_types",
     "build_type_index",
     "collect_string_literals",
-    "create_defaults",
+    "create_normalizer",
+    "create_normalizer_spec",
+    "normalize",
     "Define",
     "Index",
     "Literal",
     "Never",
-    "normalize",
     "ParamDef",
     "ParamRef",
     "parse",

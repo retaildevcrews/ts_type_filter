@@ -9,7 +9,7 @@ import pytest
 # # Add the current directory to sys.path so we can import create_defaults
 # sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from ts_type_filter import create_defaults
+from ts_type_filter import create_normalizer_spec
 from ts_type_filter import Define, Struct, Union, Literal, Type
 
 
@@ -29,7 +29,10 @@ def test_basic_example():
         }))
     ]
     
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     
     expected_name_to_type = {"a": "Foo", "b": "Foo", "c": "Bar"}
     expected_type_to_defaults = {
@@ -57,7 +60,10 @@ def test_type_references():
         # }))
     ]
 
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     expected_name_to_type = {'name2': 'MyStruct', 'name1': 'MyStruct'}
     expected_type_to_defaults = {'MyStruct': {'optional_field': None}}
     
@@ -82,7 +88,10 @@ def test_nested_type_references():
         Define("ActualNames", [], Union(Literal("deep1"), Literal("deep2")))
     ]
     
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     
     expected_name_to_type = {"deep1": "MainStruct", "deep2": "MainStruct"}
     expected_type_to_defaults = {"MainStruct": {"optional_field": None}}
@@ -102,7 +111,10 @@ def test_no_optional_fields():
         }))
     ]
     
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     
     expected_name_to_type = {"simple": "SimpleStruct"}
     expected_type_to_defaults = {}  # No optional fields
@@ -122,7 +134,10 @@ def test_no_name_field():
         }))
     ]
     
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     
     expected_name_to_type = {}  # No name field
     expected_type_to_defaults = {"NoNameStruct": {"optional_field": None}}
@@ -144,7 +159,10 @@ def test_non_struct_types():
         }))
     ]
     
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     
     expected_name_to_type = {"struct_name": "StructType"}
     expected_type_to_defaults = {"StructType": {"optional": None}}
@@ -167,7 +185,10 @@ def test_duplicate_names():
         }))
     ]
 
-    name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
+    result = create_normalizer_spec(type_defs)
+    name_to_type = result["types"]
+    type_to_defaults = result["defaults"]
+    duplicates = result["duplicates"]
     assert duplicates == {"duplicate": ["FirstStruct", "SecondStruct"]}
     # with pytest.raises(ValueError, match="Duplicate name string literals found: 'duplicate'"):
     #     create_defaults(type_defs)
