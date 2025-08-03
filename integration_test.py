@@ -6,7 +6,7 @@ to extract the default structure information.
 """
 
 from ts_type_filter import parse
-from create_defaults import create_defaults
+from ts_type_filter.create_defaults import create_defaults
 
 
 def test_integration_with_parser():

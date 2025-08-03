@@ -6,7 +6,7 @@ including unions, type references, and optional fields.
 """
 
 from ts_type_filter import Define, Struct, Union, Literal, Type
-from create_defaults import create_defaults
+from ts_type_filter.create_defaults import create_defaults
 
 
 def demo_create_defaults():

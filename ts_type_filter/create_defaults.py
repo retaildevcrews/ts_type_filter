@@ -5,7 +5,7 @@ This module provides functionality to analyze TypeScript type definitions
 and generate default value structures for structs with name fields.
 """
 
-from ts_type_filter import Define, Struct, Union, Literal, Type
+from .filter import Define, Struct, Union, Literal, Type
 
 
 def create_defaults(type_defs):
@@ -72,14 +72,14 @@ def create_defaults(type_defs):
     
     # Check for duplicates
     duplicates = {name: types for name, types in name_to_types_list.items() if len(types) > 1}
-    if duplicates:
-        duplicate_info = []
-        for name, types in duplicates.items():
-            duplicate_info.append(f'"{name}" appears in types: {", ".join(types)}')
-        raise ValueError(f"Duplicate name string literals found across different struct types:\n" + 
-                        "\n".join(duplicate_info))
+    # if duplicates:
+    #     duplicate_info = []
+    #     for name, types in duplicates.items():
+    #         duplicate_info.append(f'"{name}" appears in types: {", ".join(types)}')
+    #     raise ValueError(f"Duplicate name string literals found across different struct types:\n" + 
+    #                     "\n".join(duplicate_info))
     
-    return name_to_type, type_to_defaults
+    return name_to_type, type_to_defaults, duplicates
 
 
 def _extract_string_literals_from_type(type_node, type_defs, visited=None):
@@ -127,38 +127,38 @@ def _extract_string_literals_from_type(type_node, type_defs, visited=None):
     return literals
 
 
-def main():
-    """Example usage of create_defaults function."""
-    from ts_type_filter import Define, Struct, Union, Literal, Type
+# def main():
+#     """Example usage of create_defaults function."""
+#     from ts_type_filter import Define, Struct, Union, Literal, Type
     
-    # Example type definitions matching the specification
-    type_defs = [
-        Define("Foo", [], Struct({
-            "name": Union(Literal("a"), Literal("b")),
-            "field1?": Literal(1),
-            "field2?": Literal(3)
-        })),
-        Define("Bar", [], Struct({
-            "name": Literal("c"),
-            "field3": Literal("hello"),
-            "field4?": Literal(123)
-        }))
-    ]
+#     # Example type definitions matching the specification
+#     type_defs = [
+#         Define("Foo", [], Struct({
+#             "name": Union(Literal("a"), Literal("b")),
+#             "field1?": Literal(1),
+#             "field2?": Literal(3)
+#         })),
+#         Define("Bar", [], Struct({
+#             "name": Literal("c"),
+#             "field3": Literal("hello"),
+#             "field4?": Literal(123)
+#         }))
+#     ]
     
-    try:
-        name_to_type, type_to_defaults = create_defaults(type_defs)
+#     try:
+#         name_to_type, type_to_defaults = create_defaults(type_defs)
         
-        print("Name to Type mapping:")
-        for name, type_name in name_to_type.items():
-            print(f'  "{name}" -> "{type_name}"')
+#         print("Name to Type mapping:")
+#         for name, type_name in name_to_type.items():
+#             print(f'  "{name}" -> "{type_name}"')
         
-        print("\nType to Defaults mapping:")
-        for type_name, defaults in type_to_defaults.items():
-            print(f'  "{type_name}" -> {defaults}')
+#         print("\nType to Defaults mapping:")
+#         for type_name, defaults in type_to_defaults.items():
+#             print(f'  "{type_name}" -> {defaults}')
             
-    except ValueError as e:
-        print(f"Error: {e}")
+#     except ValueError as e:
+#         print(f"Error: {e}")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

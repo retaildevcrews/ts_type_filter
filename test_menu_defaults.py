@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "samples", "menu"))
 
-from create_defaults import create_defaults
+from ts_type_filter.create_defaults import create_defaults
 
 def test_with_menu_data():
     """Test with actual menu type definitions."""
@@ -17,10 +17,10 @@ def test_with_menu_data():
     
     try:
         # Import the menu type definitions
-        from menu_typedefs import type_defs
+        from samples.menu.menu_typedefs import type_defs
         
         # Run create_defaults on the menu data
-        name_to_type, type_to_defaults = create_defaults(type_defs)
+        name_to_type, type_to_defaults, duplicates = create_defaults(type_defs)
         
         print(f"Found {len(name_to_type)} name mappings")
         print(f"Found {len(type_to_defaults)} types with optional fields")
@@ -32,7 +32,11 @@ def test_with_menu_data():
         print("\nTypes with optional fields:")
         for type_name, defaults in type_to_defaults.items():
             print(f'  "{type_name}" -> {list(defaults.keys())}')
-            
+
+        print("\nDuplicate names found:")
+        for name, types in duplicates.items():
+            print(f'  "{name}" appears in types: {", ".join(types)}')
+
         print("✅ Menu data test completed successfully!")
         
     except ImportError as e:
