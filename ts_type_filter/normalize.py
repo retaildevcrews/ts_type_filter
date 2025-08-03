@@ -35,12 +35,19 @@ def create_normalizer_spec(type_defs):
             continue
             
         type_name = type_def.name
+        struct = None
         
-        # Only process struct types
-        if not isinstance(type_def.type, Struct):
+        # Check if it's directly a struct
+        if isinstance(type_def.type, Struct):
+            struct = type_def.type
+        else:
+            # Try to expand if it's a generic type reference
+            expanded = _expand_generic_type(type_def.type, type_defs)
+            if expanded and isinstance(expanded, Struct):
+                struct = expanded
+        
+        if not struct:
             continue
-            
-        struct = type_def.type
         
         # Look for name field in the struct
         name_field = None
@@ -119,6 +126,105 @@ def _extract_string_literals_from_type(type_node, type_defs, visited=None):
         visited.remove(type_name)
     
     return literals
+
+
+def _expand_generic_type(type_node, type_defs, visited=None):
+    """
+    Expand a generic type reference into its concrete form.
+    
+    Args:
+        type_node: A Type node that might reference a generic type
+        type_defs: List of all type definitions
+        visited: Set of visited type names to prevent infinite recursion
+        
+    Returns:
+        The expanded type, or None if it cannot be expanded into a struct
+    """
+    if visited is None:
+        visited = set()
+    
+    if not isinstance(type_node, Type):
+        return None
+    
+    type_name = type_node.name
+    type_params = type_node.params or []
+    
+    if type_name in visited:
+        return None
+        
+    visited.add(type_name)
+    
+    # Find the generic type definition
+    generic_def = None
+    for type_def in type_defs:
+        if isinstance(type_def, Define) and type_def.name == type_name:
+            generic_def = type_def
+            break
+    
+    if not generic_def:
+        visited.remove(type_name)
+        return None
+    
+    # Only process if it's a generic with parameters and the referenced type is a Struct
+    if not generic_def.params or not isinstance(generic_def.type, Struct):
+        visited.remove(type_name)
+        return None
+    
+    # Check if we have the right number of type arguments
+    if len(type_params) != len(generic_def.params):
+        visited.remove(type_name)
+        return None
+    
+    # Create a mapping from type parameter names to actual types
+    param_mapping = {}
+    for i, param_def in enumerate(generic_def.params):
+        param_name = param_def if isinstance(param_def, str) else param_def.name
+        param_mapping[param_name] = type_params[i]
+    
+    # Substitute type parameters in the struct
+    expanded_struct = _substitute_type_parameters(generic_def.type, param_mapping)
+    
+    visited.remove(type_name)
+    return expanded_struct
+
+
+def _substitute_type_parameters(node, param_mapping):
+    """
+    Substitute type parameters in a type node with actual types.
+    
+    Args:
+        node: The type node to process
+        param_mapping: Dictionary mapping parameter names to actual types
+        
+    Returns:
+        A new node with type parameters substituted
+    """
+    if isinstance(node, Type):
+        if node.name in param_mapping:
+            return param_mapping[node.name]
+        else:
+            # Recursively substitute in type parameters if any
+            new_params = None
+            if node.params:
+                new_params = [_substitute_type_parameters(p, param_mapping) for p in node.params]
+            return Type(node.name, new_params)
+    
+    elif isinstance(node, Struct):
+        new_obj = {}
+        for field_name, field_type in node.obj.items():
+            new_obj[field_name] = _substitute_type_parameters(field_type, param_mapping)
+        return Struct(new_obj)
+    
+    elif isinstance(node, Union):
+        new_types = [_substitute_type_parameters(t, param_mapping) for t in node.types]
+        return Union(*new_types)
+    
+    elif isinstance(node, Literal):
+        return node  # Literals don't need substitution
+    
+    else:
+        # For other node types, return as-is
+        return node
 
 
 def create_normalizer(spec):
