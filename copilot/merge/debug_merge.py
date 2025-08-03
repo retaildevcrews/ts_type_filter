@@ -4,11 +4,11 @@ Debug utilities for merge_normalizer_specs function.
 
 import sys
 import os
-import json
 
 # Add the parent directory to the path so we can import ts_type_filter
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
+from gotaglio.shared import to_json_string
 from ts_type_filter.normalize import merge_normalizer_specs
 
 
@@ -23,11 +23,11 @@ def debug_merge_step_by_step(newSpec, originalSpec, renamedTypes):
     print("\nInput Parameters:")
     print("-" * 40)
     print("newSpec:")
-    print(json.dumps(newSpec, indent=2))
+    print(to_json_string(newSpec))
     print("\noriginalSpec:")
-    print(json.dumps(originalSpec, indent=2))
+    print(to_json_string(originalSpec))
     print("\nrenamedTypes:")
-    print(json.dumps(renamedTypes, indent=2))
+    print(to_json_string(renamedTypes))
     
     print("\n" + "=" * 80)
     print("STEP-BY-STEP EXECUTION")
@@ -137,7 +137,7 @@ def debug_merge_step_by_step(newSpec, originalSpec, renamedTypes):
     print("FINAL RESULT")
     print("=" * 80)
     print("Merged spec:")
-    print(json.dumps(merged_spec, indent=2))
+    print(to_json_string(merged_spec))
     print("\nWarnings:")
     for i, warning in enumerate(warnings, 1):
         print(f"{i}. {warning}")

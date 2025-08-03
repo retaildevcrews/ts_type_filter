@@ -1,5 +1,6 @@
-import json
 import re
+
+from gotaglio.shared import to_json_string
 
 def read_sonnets(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -33,6 +34,6 @@ if __name__ == "__main__":
 
     # Write the generated code to a Python file
     with open("sonnets.py", "w", encoding="utf-8") as output_file:
-        output_file.write(json.dumps(sonnets_list, indent=2, ensure_ascii=False))
+        output_file.write(to_json_string(sonnets_list))
     
     print("Python source file 'sonnets.py' generated successfully.")

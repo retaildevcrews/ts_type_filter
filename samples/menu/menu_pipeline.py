@@ -38,7 +38,7 @@ from gotaglio.main import main
 from gotaglio.models import Model
 from gotaglio.pipeline import Internal, Pipeline, Prompt
 from gotaglio.repair import Repair
-from gotaglio.shared import build_template
+from gotaglio.shared import build_template, to_json_string
 
 from ts_type_filter import (
     collect_string_literals,
@@ -190,7 +190,7 @@ class MenuPipeline(Pipeline):
 
             messages = [
                 {"role": "system", "content": await template({"menu": pruned})},
-                {"role": "assistant", "content": json.dumps(cart, indent=2)},
+                {"role": "assistant", "content": to_json_string(cart, indent=2)},
             ]
             messages.append({"role": "user", "content": context["case"]["query"]})
 
@@ -423,7 +423,7 @@ class MenuPipeline(Pipeline):
                         console.print(f"**assistant:**")
                         console.print("```json")
                         console.print(
-                            json.dumps(turn_result["stages"]["extract"], indent=2)
+                            to_json_string(turn_result["stages"]["extract"])
                         )
                         console.print("```")
                         console.print()
@@ -560,7 +560,7 @@ class Flakey(Model):
     async def infer(self, messages, result=None):
         self._counter += 1
         if self._counter % 3 == 0:
-            return json.dumps(result["case"]["turns"][-1]["expected"])
+            return to_json_string(result["case"]["turns"][-1]["expected"])
         elif self._counter % 3 == 1:
             return "hello world"
         else:
@@ -580,7 +580,7 @@ class Perfect(Model):
         registry.register_model("perfect", self)
 
     async def infer(self, messages, result=None):
-        return json.dumps(result["case"]["expected"])
+        return to_json_string(result["case"]["expected"])
 
     def metadata(self):
         return {}

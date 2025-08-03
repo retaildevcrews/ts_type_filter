@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-import json
+
+from gotaglio.shared import to_json_string
 
 from .inverted_index import Index
 
@@ -321,7 +322,7 @@ class Literal(Node):
         self.pinned = pinned
 
     def format(self):
-        return json.dumps(self.text, ensure_ascii=False)
+        return to_json_string(self.text)
 
     def index(self, symbols, indexer):
         indexer.add(self)
