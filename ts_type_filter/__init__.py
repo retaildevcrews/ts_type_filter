@@ -1,4 +1,4 @@
-from .normalize import create_normalizer, create_normalizer_spec
+from .normalize import create_normalizer, create_normalizer_spec, merge_normalizer_specs
 from .inverted_index import Index
 from .filter import (
     Any,
@@ -27,6 +27,7 @@ __all__ = [
     "collect_string_literals",
     "create_normalizer",
     "create_normalizer_spec",
+    "merge_normalizer_specs",
     "normalize",
     "Define",
     "Index",

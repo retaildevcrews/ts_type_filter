@@ -195,3 +195,94 @@ def normalize(tree, defaults):
         return node
     
     return _normalize_recursive(result)
+
+
+def merge_normalizer_specs(newSpec, originalSpec, renamedTypes):
+    """
+    Merge two normalizer specs that were produced by create_normalizer_spec().
+    
+    Args:
+        newSpec: The new normalizer spec dictionary containing "types", "defaults", and "duplicates"
+        originalSpec: The original normalizer spec dictionary
+        renamedTypes: Dictionary mapping old type names to new type names
+        
+    Returns:
+        tuple: (merged_spec, warnings)
+            - merged_spec: Dictionary with "types", "defaults", and "duplicates" keys
+            - warnings: List of warning strings about renames and stale entries
+    """
+    warnings = []
+    
+    # Check for duplicates and name collisions in rename dictionary
+    if renamedTypes:
+        # Check for duplicate values in renamedTypes (multiple old types mapping to same new type)
+        reverse_mapping = {}
+        for old_type, new_type in renamedTypes.items():
+            if new_type in reverse_mapping:
+                warnings.append(f"Name collision in rename dictionary: multiple types renamed to '{new_type}' ({reverse_mapping[new_type]}, {old_type})")
+            else:
+                reverse_mapping[new_type] = old_type
+        
+        # Check if any renamed types would conflict with existing types in newSpec
+        new_types_in_defaults = set(newSpec.get("defaults", {}).keys())
+        for old_type, new_type in renamedTypes.items():
+            if new_type in new_types_in_defaults:
+                warnings.append(f"Rename collision: renaming '{old_type}' to '{new_type}' conflicts with existing type in new spec")
+    
+    # Start with new spec's types and duplicates (as specified)
+    merged_spec = {
+        "types": newSpec.get("types", {}).copy(),
+        "duplicates": newSpec.get("duplicates", {}).copy(),
+        "defaults": {}
+    }
+    
+    # Build merged defaults dictionary
+    original_defaults = originalSpec.get("defaults", {})
+    new_defaults = newSpec.get("defaults", {})
+    
+    # First, add all new types from newSpec
+    for type_name, defaults in new_defaults.items():
+        # Check if this new type is the result of a rename
+        is_rename_target = type_name in renamedTypes.values()
+        
+        if is_rename_target:
+            # This type is the target of a rename - merge with original
+            old_type = None
+            for old, new in renamedTypes.items():
+                if new == type_name:
+                    old_type = old
+                    break
+            
+            if old_type and old_type in original_defaults:
+                warnings.append(f"Type renamed: '{old_type}' -> '{type_name}'")
+                # Start with original defaults, then update with new defaults (new takes precedence)
+                merged_defaults = original_defaults[old_type].copy() if original_defaults[old_type] else {}
+                if defaults:
+                    merged_defaults.update(defaults)
+                merged_spec["defaults"][type_name] = merged_defaults
+            else:
+                # No original defaults to merge
+                merged_spec["defaults"][type_name] = defaults.copy() if defaults else {}
+        else:
+            # Newly introduced type not involved in rename - add it
+            merged_spec["defaults"][type_name] = defaults.copy() if defaults else {}
+    
+    # Handle original types that are not being renamed
+    renamed_from_original = set(renamedTypes.keys())
+    new_type_names = set(new_defaults.keys())
+    
+    for original_type, original_default in original_defaults.items():
+        if original_type not in renamed_from_original:
+            # This type wasn't renamed
+            if original_type not in new_type_names:
+                # Original type not mentioned in newSpec - flagged as stale
+                if original_default is None:
+                    # Stale entry bound to None - remove it (don't add to merged spec)
+                    warnings.append(f"Stale entry removed: '{original_type}' not found in new spec")
+                else:
+                    # Stale entry bound to a dict - retain with warning
+                    warnings.append(f"Stale entry retained: '{original_type}' not found in new spec")
+                    merged_spec["defaults"][original_type] = original_default.copy() if original_default else {}
+            # If original_type is in new_type_names, it's handled above in the new_defaults loop
+    
+    return merged_spec, warnings

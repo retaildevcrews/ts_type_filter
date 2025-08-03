@@ -5,6 +5,7 @@ Top Top Top
   * create_normalizer_spec()
   * create_normalizer()
   * merge_normalizer_specs()
+    * Merge logic with renaming not quite right
 * Pydantic
 * Parse errors
   * Comments inside definitions
