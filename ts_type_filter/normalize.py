@@ -255,11 +255,11 @@ def create_normalizer(spec):
     
     # Return the curried function
     def normalizer(tree):
-        return normalize(tree, name_based_defaults)
+        return normalize2(tree, name_based_defaults)
     
     return normalizer
 
-def normalize(tree, defaults):
+def normalize1(tree, defaults):
     """
     Makes a deep copy of tree, replacing any dictionary that has a 'name'
     property with the merge of the default template with that name and the keys
@@ -302,6 +302,46 @@ def normalize(tree, defaults):
     
     return _normalize_recursive(result)
 
+def normalize2(tree, defaults):
+    """
+    Makes a deep copy of tree, editing any dictionary that has a 'name'
+    property to remove all keys that have default values equal to those in
+    the default template with that name.
+    
+    Args:
+        tree: A dictionary whose keys map to primitive types or other trees
+        defaults: A dictionary mapping string keys to object templates
+    
+    Returns:
+        A normalized deep copy of the tree
+    """
+    # Make a deep copy to avoid modifying the original
+    result = copy.deepcopy(tree)
+    
+    def _normalize_recursive(node):
+        if isinstance(node, dict):
+            # Check if this dictionary has a 'name' property
+            if 'name' in node:
+                name = node['name']
+                default_spec = defaults.get(name, {})
+                for key, default_value in default_spec.items():
+                    # If the current node has the same key with the same value, remove it
+                    if key in node and node[key] == default_value:
+                        del node[key]
+            
+            # Recursively normalize all values in the dictionary
+            for key, value in node.items():
+                node[key] = _normalize_recursive(value)
+        
+        elif isinstance(node, list):
+            # Handle lists by normalizing each element
+            for i, item in enumerate(node):
+                node[i] = _normalize_recursive(item)
+        
+        # For primitive types, return as-is
+        return node
+    
+    return _normalize_recursive(result)
 
 def merge_normalizer_specs(newSpec, originalSpec, renamedTypes):
     """

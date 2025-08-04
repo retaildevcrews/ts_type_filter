@@ -2,6 +2,8 @@
 
 Top Top Top
 * Normalizer
+  * Bug: named types with no optional fields don't show up in defaults.
+    * Is this really a bug or can the normalizer deal with it?
   * create_normalizer_spec()
   * create_normalizer()
   * merge_normalizer_specs()
