@@ -1,17 +1,19 @@
 """
-Create default values for structs based on type definitions.
-
-This module provides functionality to analyze TypeScript type definitions
-and generate default value structures for structs with name fields.
+Implementation of generic type expansion for create_normalizer_spec.
 """
+
 import copy
+import os
+import sys
 
-from .filter import Define, Struct, Union, Literal, Type
+# Add the parent directory to sys.path to import ts_type_filter
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
+from ts_type_filter.filter import Define, Struct, Union, Literal, Type
 
 def create_normalizer_spec(type_defs):
     """
-    Create a data structure for specifying default values for structs.
+    Enhanced version of create_normalizer_spec that handles generic type expansion.
     
     Args:
         type_defs (list): List of type definitions (Define objects)
@@ -42,7 +44,7 @@ def create_normalizer_spec(type_defs):
             struct = type_def.type
         else:
             # Try to expand if it's a generic type reference
-            expanded = _expand_generic_type(type_def.type, type_defs)
+            expanded = expand_generic_type(type_def.type, type_defs)
             if expanded and isinstance(expanded, Struct):
                 struct = expanded
         
@@ -81,7 +83,6 @@ def create_normalizer_spec(type_defs):
     # Check for duplicates
     duplicates = {name: types for name, types in name_to_types_list.items() if len(types) > 1}
     return {"types": name_to_type, "defaults": type_to_defaults, "duplicates": duplicates}
-
 
 def _extract_string_literals_from_type(type_node, type_defs, visited=None):
     """
@@ -127,8 +128,7 @@ def _extract_string_literals_from_type(type_node, type_defs, visited=None):
     
     return literals
 
-
-def _expand_generic_type(type_node, type_defs, visited=None):
+def expand_generic_type(type_node, type_defs, visited=None):
     """
     Expand a generic type reference into its concrete form.
     
@@ -182,13 +182,13 @@ def _expand_generic_type(type_node, type_defs, visited=None):
         param_mapping[param_name] = type_params[i]
     
     # Substitute type parameters in the struct
-    expanded_struct = _substitute_type_parameters(generic_def.type, param_mapping)
+    expanded_struct = substitute_type_parameters(generic_def.type, param_mapping)
     
     visited.remove(type_name)
     return expanded_struct
 
 
-def _substitute_type_parameters(node, param_mapping):
+def substitute_type_parameters(node, param_mapping):
     """
     Substitute type parameters in a type node with actual types.
     
@@ -206,17 +206,17 @@ def _substitute_type_parameters(node, param_mapping):
             # Recursively substitute in type parameters if any
             new_params = None
             if node.params:
-                new_params = [_substitute_type_parameters(p, param_mapping) for p in node.params]
+                new_params = [substitute_type_parameters(p, param_mapping) for p in node.params]
             return Type(node.name, new_params)
     
     elif isinstance(node, Struct):
         new_obj = {}
         for field_name, field_type in node.obj.items():
-            new_obj[field_name] = _substitute_type_parameters(field_type, param_mapping)
+            new_obj[field_name] = substitute_type_parameters(field_type, param_mapping)
         return Struct(new_obj)
     
     elif isinstance(node, Union):
-        new_types = [_substitute_type_parameters(t, param_mapping) for t in node.types]
+        new_types = [substitute_type_parameters(t, param_mapping) for t in node.types]
         return Union(*new_types)
     
     elif isinstance(node, Literal):
@@ -380,3 +380,47 @@ def merge_normalizer_specs(newSpec, originalSpec, renamedTypes):
     merged_spec["defaults"] = merged_defaults
     
     return merged_spec, warnings
+
+
+
+# def test_enhanced_function():
+#     """Test the enhanced function with the generic type example."""
+    
+#     type_defs = [
+#         # Generic type definition: OPTION<NAME> = { name: NAME; field1?: number; field2: string; }
+#         Define("OPTION", ["NAME"], Struct({
+#             "name": Type("NAME"),  # This is a type parameter
+#             "field1?": Literal(0),  # optional field with number type
+#             "field2": Literal(""),  # required field with string type
+#         })),
+        
+#         # Type that uses the generic: GROUP = OPTION<"a" | "b">
+#         Define("GROUP", [], Type("OPTION", [Union(Literal("a"), Literal("b"))])),
+#     ]
+    
+#     result = create_normalizer_spec(type_defs)
+#     name_to_type = result["types"]
+#     type_to_defaults = result["defaults"]
+#     duplicates = result["duplicates"]
+    
+#     print("Enhanced function result:")
+#     print(f"  name_to_type: {name_to_type}")
+#     print(f"  type_to_defaults: {type_to_defaults}")
+#     print(f"  duplicates: {duplicates}")
+    
+#     # Now GROUP should be processed correctly
+#     expected_name_to_type = {"a": "GROUP", "b": "GROUP"}
+#     expected_type_to_defaults = {
+#         "OPTION": {"field1": None},  # The original OPTION type
+#         "GROUP": {"field1": None}    # The expanded GROUP type
+#     }
+    
+#     assert name_to_type == expected_name_to_type, f"Expected {expected_name_to_type}, got {name_to_type}"
+#     assert type_to_defaults == expected_type_to_defaults, f"Expected {expected_type_to_defaults}, got {type_to_defaults}"
+#     assert not duplicates, "Expected no duplicate names"
+    
+#     print("Enhanced function test passed!")
+
+
+# if __name__ == "__main__":
+#     test_enhanced_function()
