@@ -6,8 +6,9 @@ Test script to check if create_normalizer_spec() works on copilot/normalize/bug.
 import sys
 import os
 
-# Add the current directory to sys.path so we can import ts_type_filter
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the root directory to sys.path so we can import ts_type_filter
+root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+sys.path.insert(0, root_dir)
 
 from ts_type_filter import parse, create_normalizer_spec
 
@@ -78,16 +79,6 @@ type BOOLEANOPTION<NAME> = {
         # Check if results match expectations
         types_match = result['types'] == expected_types
         defaults_match = result['defaults'] == expected_defaults
-        # # For defaults, we need to handle the case where some might not be present
-        # defaults_match = True
-        # for type_name, expected_default in expected_defaults.items():
-        #     if type_name not in result['defaults']:
-        #         if expected_default:  # Only fail if we expected non-empty defaults
-        #             defaults_match = False
-        #             break
-        #     elif result['defaults'][type_name] != expected_default:
-        #         defaults_match = False
-        #         break
         
         print(f"\nResults analysis:")
         print(f"  Types match expected: {types_match}")

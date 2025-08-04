@@ -63,13 +63,13 @@ def create_normalizer_spec(type_defs):
                 clean_field_name = field_name[:-1]  # Remove the '?' suffix
                 optional_fields[clean_field_name] = None
         
-        # Store optional fields for this type
-        if optional_fields:
-            type_to_defaults[type_name] = optional_fields
-        
         # Extract string literals from name field
         if name_field:
             name_literals = _extract_string_literals_from_type(name_field, type_defs)
+            
+            # Only store defaults for types that actually have string literals (concrete types)
+            if name_literals and optional_fields:
+                type_to_defaults[type_name] = optional_fields
             
             for literal in name_literals:
                 # Track for duplicate detection
