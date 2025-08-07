@@ -15,7 +15,7 @@ from ts_type_filter import (
 grammar = r"""
 ?start: lines
 
-lines: (define | COMMENT)*
+lines: (define | comment)*
 
 define: "type" CNAME type_params? "=" type (";")?
 
@@ -55,7 +55,9 @@ literal: numeric_literal | string_literal
 numeric_literal: SIGNED_NUMBER
 string_literal: ESCAPED_STRING | ESCAPED_STRING2
 
-COMMENT: /\/\/[^\n]*/
+comment: LINE_COMMENT | BLOCK_COMMENT
+LINE_COMMENT: /\/\/[^\n]*/
+BLOCK_COMMENT: /\/\*[\s\S]*?\*\//
 ESCAPED_STRING2 : "'" _STRING_ESC_INNER "'"
 %import common.CNAME
 %import common.ESCAPED_STRING
@@ -91,14 +93,26 @@ def parse(text):
         def lines(self, children):
             result = []
             for child in children:
-                if isToken(child, "COMMENT"):
-                    if child.value.startswith("// Hint: "):
-                        result.append("//" + child[8:])
-                else:
+                if isinstance(child, tuple):
+                    comment_type, content = child
+                    if comment_type == "line_hint":
+                        result.append("//" + content)
+                    elif comment_type == "block_hint":
+                        result.append("/*" + content + "*/")
+                # if isToken(child, "LINE_COMMENT"):
+                #     if child.value.startswith("// Hint: "):
+                #         result.append("//" + child[8:])
+                # elif isToken(child, "BLOCK_COMMENT"):
+                #     if child.value.startswith("/* Hint: "):
+                #         result.append("/*" + child[8:])
+                #     else:
+                #         result.append(child.value)
+                elif child is not None:
                     result.append(child)
             return result
 
         def define(self, children):
+            # TODO: BUG: only preserves last comment
             hint = None
             while isToken(children[0], "COMMENT"):
                 hint = children.pop(0).value[2:].strip()  # Strip `// ` from comment token
@@ -109,6 +123,24 @@ def parse(text):
             )  # Get type parameters if any
             value = children.pop()  # The type definition itself
             return Define(name, params, value, hint)
+
+        def comment(self, items):
+            # items[0] will be either a LINE_COMMENT or BLOCK_COMMENT token
+            comment_token = items[0]
+            
+            if isToken(comment_token, "LINE_COMMENT"):
+                if comment_token.value.startswith("// Hint: "):
+                    # Extract the hint content after "// Hint: "
+                    hint_content = comment_token.value[8:]  # Skip "// Hint: "
+                    return ("line_hint", hint_content)
+            elif isToken(comment_token, "BLOCK_COMMENT"):
+                if comment_token.value.startswith("/* Hint: "):
+                    # Extract the hint content, removing "/* Hint: " at start and "*/" at end
+                    hint_content = comment_token.value[8:-2]  # Skip "/* Hint: " and "*/"
+                    return ("block_hint", hint_content)
+
+            # Skip non-hint comments by returning None
+            return None
 
         def type_params(self, items):
             return items

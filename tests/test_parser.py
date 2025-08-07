@@ -20,7 +20,7 @@ test_cases = [
     (" type   a < A,B, C > = never ; ", "type a<A,B,C>=never;", "ignoring whitespace"),
     ('type a="hello";', 'type a="hello";', "double quotes"),
     ("type a='hello';", 'type a="hello";', "single quotes"),
-    ("type a=123;", 'type a=123;', "number"),
+    ("type a=123;", "type a=123;", "number"),
     (
         "// this is a comment\ntype a<A,B,C>=never;",
         "type a<A,B,C>=never;",
@@ -29,7 +29,7 @@ test_cases = [
     (
         "// this is a comment\n// this is another comment\ntype a<A,B,C>=never;",
         "type a<A,B,C>=never;",
-        "multi-line comment",
+        "multiple single-line comments",
     ),
     (
         "// Hint: this is a comment\ntype a<A,B,C>=never;",
@@ -39,44 +39,67 @@ test_cases = [
     (
         "// this is a comment\n// Hint: this is another comment\ntype a<A,B,C>=never;",
         "// this is another comment\ntype a<A,B,C>=never;",
-        "multi-line hint comment",
+        "multiple single-line comments with one hint",
+    ),
+    (
+        "/* comment */\ntype a<A,B,C>=never;",
+        "type a<A,B,C>=never;",
+        "block comment",
+    ),
+    (
+        "/* Hint: comment */\ntype a<A,B,C>=never;",
+        "/* comment */\ntype a<A,B,C>=never;",
+        "block comment with hint",
+    ),
+    (
+        "type A = {\n  x: number; // Hint: trailing line comment}\  y: number;\n}\n",
+        "type A = {\n  x: number; // trailing line comment}\  y: number;\n}\n",
+        "inline line comment",
     ),
     ("type A = B\ntype C = D", "type A=B;\ntype C=D;", "multi-line no semicolon"),
     ("type D={a:1,b:'text'};", 'type D={a:1,b:"text"};', "struct1"),
     ("type D={a:1,b:'text',};", 'type D={a:1,b:"text"};', "struct2"),
     ("type D={a:1;b:'text';};", 'type D={a:1,b:"text"};', "struct3"),
     ("type D={a:1,b:'text';};", 'type D={a:1,b:"text"};', "struct4"),
-    ("type D={a?:1};", 'type D={a?:1};', "optional struct field"),
-    (" type  D = { a ? : 1 };", 'type D={a?:1};', "optional struct field with spaces"),
-    ("type A=B[];", 'type A=B[];', "array"),
-    ("type A=B[][];", 'type A=B[][];', "array2"),
-    ("type A={a:1,b:2}[];", 'type A={a:1,b:2}[];', "array3"),
-    ("type A=B|C;", 'type A=B|C;', "union"),
-    ("type A=|B|C;", 'type A=B|C;', "leading union"),
-    ("type a<A,B,C>=D;\ntype D={a:1};", "type a<A,B,C>=D;\ntype D={a:1};", "multiple defines"),
-
+    ("type D={a?:1};", "type D={a?:1};", "optional struct field"),
+    (" type  D = { a ? : 1 };", "type D={a?:1};", "optional struct field with spaces"),
+    ("type A=B[];", "type A=B[];", "array"),
+    ("type A=B[][];", "type A=B[][];", "array2"),
+    ("type A={a:1,b:2}[];", "type A={a:1,b:2}[];", "array3"),
+    ("type A=B|C;", "type A=B|C;", "union"),
+    ("type A=|B|C;", "type A=B|C;", "leading union"),
+    (
+        "type a<A,B,C>=D;\ntype D={a:1};",
+        "type a<A,B,C>=D;\ntype D={a:1};",
+        "multiple defines",
+    ),
     # Operator precedence
-    ("type A=B|C[];", 'type A=B|C[];', "operator precedence"),
-
+    ("type A=B|C[];", "type A=B|C[];", "operator precedence"),
     # Parentheses
-    ("type A=(B|C)[];", 'type A=(B|C)[];', "parentheses"),
-
+    ("type A=(B|C)[];", "type A=(B|C)[];", "parentheses"),
     # <A extends T>
     ("type A<B extends C>={a:B};", "type A<B extends C>={a:B};", "extends 1"),
-
     # LITERAL - these just ensure correct serialization without crashing.
     # A separate test checks the aliases and pinned values.
     ("type A = LITERAL<'Coca-Cola', [], true>", 'type A="Coca-Cola";', "LITERAL1"),
-    ("type A = LITERAL<'Coca-Cola', ['coke'], true>", 'type A="Coca-Cola";', "LITERAL2"),
-    ("type A = LITERAL<'Coca-Cola', ['coke', 'pop'], true>", 'type A="Coca-Cola";', "LITERAL3"),
-
+    (
+        "type A = LITERAL<'Coca-Cola', ['coke'], true>",
+        'type A="Coca-Cola";',
+        "LITERAL2",
+    ),
+    (
+        "type A = LITERAL<'Coca-Cola', ['coke', 'pop'], true>",
+        'type A="Coca-Cola";',
+        "LITERAL3",
+    ),
     # A slightly longer case found while debugging
     (
-        'type Optional="No"|"Regular";\n// Hint: Use CHOOSE when customer doesn''t specify an option\ntype CHOOSE="CHOOSE";',
-        'type Optional="No"|"Regular";\n// Use CHOOSE when customer doesn''t specify an option\ntype CHOOSE="CHOOSE";',
-        "longer"
+        'type Optional="No"|"Regular";\n// Hint: Use CHOOSE when customer doesn'
+        't specify an option\ntype CHOOSE="CHOOSE";',
+        'type Optional="No"|"Regular";\n// Use CHOOSE when customer doesn'
+        't specify an option\ntype CHOOSE="CHOOSE";',
+        "longer",
     ),
-
     # Complex cases from Copilot - array, union, and nested types
     (
         "type Result<T extends string> = { status: 'ok' | 'fail', data: T[] };",
@@ -106,10 +129,11 @@ test_cases = [
 )
 def test_cases(source, expected, test_name):
     tree = parse(source)
-    observed = '\n'.join([node.format() for node in tree])
+    observed = "\n".join([node.format() for node in tree])
     assert (
         observed == expected
     ), f"❌ Test Failed: {test_name} | Observed \n{observed}\nExpected \n{expected}"
+
 
 comprehensive = """
 type Cart={items:Item[]};
@@ -156,40 +180,44 @@ type Optional="No"|"Regular";
 type CHOOSE="CHOOSE";
 """
 
+
 def test_comprehensive():
     tree = parse(comprehensive)
     o = [node.format() for node in tree]
     e = comprehensive.splitlines()[1:]
     for i in range(len(o)):
         if e[i].startswith("// Hint:"):
-            assert(o[i] == "//" + e[i][8:])
+            assert o[i] == "//" + e[i][8:]
         else:
-            assert(o[i] == e[i])
+            assert o[i] == e[i]
+
 
 def test_comprehensive_no_semicolon():
     lines_original = comprehensive.splitlines()[1:]
-    lines_no_semicolons = [line[:-1] if line.endswith(';') else line for line in lines_original] # remove semicolons
-    tree = parse('\n'.join(lines_no_semicolons))
+    lines_no_semicolons = [
+        line[:-1] if line.endswith(";") else line for line in lines_original
+    ]  # remove semicolons
+    tree = parse("\n".join(lines_no_semicolons))
     o = [node.format() for node in tree]
     e = lines_original
     for i in range(len(o)):
         if e[i].startswith("// Hint:"):
-            assert(o[i] == "//" + e[i][8:])
+            assert o[i] == "//" + e[i][8:]
         else:
-            assert(o[i] == e[i])
+            assert o[i] == e[i]
+
 
 def test_literalex():
     tree = parse("type A = LITERAL<'Coca-Cola', ['coke', 'pop'], true>")
     o = [node.format() for node in tree]
     e = ['type A="Coca-Cola";']
-    assert(o == e)
-    assert(len(tree) == 1)
+    assert o == e
+    assert len(tree) == 1
     define = tree[0]
-    assert(isinstance(define, Define))
-    assert(define.name == "A")
+    assert isinstance(define, Define)
+    assert define.name == "A"
     literal = define.type
-    assert(isinstance(literal, Literal))
-    assert(literal.text == "Coca-Cola")
-    assert(literal.pinned == True)
-    assert(literal.aliases == ['coke', 'pop'])
-    
+    assert isinstance(literal, Literal)
+    assert literal.text == "Coca-Cola"
+    assert literal.pinned == True
+    assert literal.aliases == ["coke", "pop"]
