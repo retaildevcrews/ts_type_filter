@@ -1,4 +1,5 @@
 import ast
+import re
 
 from ts_type_filter import (
     Any,
@@ -209,5 +210,108 @@ def parse(text):
             return Union(*items)
     
     parser = get_parser()
-    tree = parser.parse(text)
+    tree = parser.parse(strip_typescript_comments(text))
     return ParseTransformer().transform(tree)
+
+# def strip_typescript_comments(source_text: str) -> str:
+#     """
+#     Strip comments from TypeScript source code with string literal protection.
+    
+#     This version temporarily replaces string literals with placeholders
+#     to avoid incorrectly processing comment-like patterns within strings.
+    
+#     Args:
+#         source_text: The TypeScript source code as a string
+        
+#     Returns:
+#         The source code with comments stripped, preserving string literals
+#     """
+#     # Step 1: Find and temporarily replace string literals
+#     strings = []
+#     placeholder_pattern = "___STRING_PLACEHOLDER_{}___"
+    
+#     def replace_string(match):
+#         strings.append(match.group(0))
+#         return placeholder_pattern.format(len(strings) - 1)
+    
+#     # Replace string literals with placeholders
+#     # Handle double-quoted strings (with escape handling)
+#     protected_text = re.sub(r'"(?:[^"\\]|\\.)*"', replace_string, source_text)
+#     # Handle single-quoted strings (with escape handling)
+#     protected_text = re.sub(r"'(?:[^'\\]|\\.)*'", replace_string, protected_text)
+#     # Handle template literals (with escape handling)
+#     protected_text = re.sub(r'`(?:[^`\\]|\\.)*`', replace_string, protected_text)
+    
+#     # Step 2: Remove comments from protected text
+#     # Remove block comments
+#     protected_text = re.sub(r'/\*.*?\*/', '', protected_text, flags=re.DOTALL)
+    
+#     # Remove line comments that don't begin with "// Hint: "
+#     protected_text = re.sub(r'//(?! Hint: ).*$', '', protected_text, flags=re.MULTILINE)
+    
+#     # Step 3: Restore original strings
+#     for i, original_string in enumerate(strings):
+#         protected_text = protected_text.replace(placeholder_pattern.format(i), original_string)
+    
+#     return protected_text
+
+def strip_typescript_comments(source_text: str) -> str:
+    """
+    Strip comments from TypeScript source code with string literal protection,
+    preserving both line and block comments that start with "Hint: ".
+    
+    This version preserves:
+    - Line comments starting with "// Hint: "
+    - Block comments starting with "/* Hint: "
+    
+    Args:
+        source_text: The TypeScript source code as a string
+        
+    Returns:
+        The source code with comments stripped, preserving string literals
+        and hint comments (both line and block)
+    """
+    # Step 1: Find and temporarily replace string literals
+    strings = []
+    placeholder_pattern = "___STRING_PLACEHOLDER_{}___"
+    
+    def replace_string(match):
+        strings.append(match.group(0))
+        return placeholder_pattern.format(len(strings) - 1)
+    
+    # Replace string literals with placeholders
+    # Handle double-quoted strings (with escape handling)
+    protected_text = re.sub(r'"(?:[^"\\]|\\.)*"', replace_string, source_text)
+    # Handle single-quoted strings (with escape handling)
+    protected_text = re.sub(r"'(?:[^'\\]|\\.)*'", replace_string, protected_text)
+    # Handle template literals (with escape handling)
+    protected_text = re.sub(r'`(?:[^`\\]|\\.)*`', replace_string, protected_text)
+    
+    # Step 2: Remove comments from protected text, but preserve hint comments
+    
+    # First, find and temporarily protect hint block comments
+    hint_blocks = []
+    hint_block_pattern = "___HINT_BLOCK_PLACEHOLDER_{}___"
+    
+    def replace_hint_block(match):
+        hint_blocks.append(match.group(0))
+        return hint_block_pattern.format(len(hint_blocks) - 1)
+    
+    # Protect block comments that start with "/* Hint: "
+    protected_text = re.sub(r'/\*\s*Hint:\s*.*?\*/', replace_hint_block, protected_text, flags=re.DOTALL)
+    
+    # Remove remaining block comments (non-hint ones)
+    protected_text = re.sub(r'/\*.*?\*/', '', protected_text, flags=re.DOTALL)
+    
+    # Restore hint block comments
+    for i, hint_block in enumerate(hint_blocks):
+        protected_text = protected_text.replace(hint_block_pattern.format(i), hint_block)
+    
+    # Remove line comments that don't begin with "// Hint: "
+    protected_text = re.sub(r'//(?! Hint: ).*$', '', protected_text, flags=re.MULTILINE)
+    
+    # Step 3: Restore original strings
+    for i, original_string in enumerate(strings):
+        protected_text = protected_text.replace(placeholder_pattern.format(i), original_string)
+    
+    return protected_text

@@ -26,6 +26,58 @@ that includes the associated `type`.
 type CHOOSE = LITERAL<"CHOOSE", [], true>;
 ~~~
 
+**A Note on Comment Handling:** the typescript type definition files makes
+use of comments for two purposes.
+
+The first is for the benefit of the author.
+These comments are block comments (/* */)  and those line comments (//) that don't begin with `"// Hint: "`. These comments are all stripped from the
+Typescript source text and will therefore not be available to the LLM prompt.
+
+The second is to provide the LLM with a brief hint relating to a type declaraction. Any type declaration can be preceded by a sinlge line comment that starts with `"// Hint: "`. This comment will appear in the filtered Typescript with the `"Hint: "` text stripped out. Because ts-type-filter erases unreferenced type declarations, it is essential that the system knows which hint comments apply to which type declarations. The sole mechanism for making this association is the proximity of the hint comment to the type.
+
+Hint comments that appear anywhere other than the line before a type
+declaration will result in a parse error. They cannot be placed inside of or after a type declaration. The following example would create a parse error:
+
+~~~typescript
+/* Hint: Parse error because this is a block comment. */
+type Point = {
+  x: number; // Hint: this is the x-coordinate. Parse error.
+
+  // Hint: this is the y-coordinate. Parse error.
+  y: number;
+}
+~~~
+
+The following declaration is legal:
+~~~typescript
+// This comment will be stripped out.
+
+/* This comment will be stripped out. */
+
+// Hint: this comment will be retained and associated with type Point.
+type Point = {
+  x: number;
+  y: number;
+}
+~~~
+
+The rationale for not allowing hint comments to the right of type declarations
+is that it is not always clear whether the hint should be associated with the
+preceding or next type. For example,
+
+~~~typescript
+type A =
+  | B
+  // Does this refer to B or C?
+  | C
+  | D // Does this refer to D or E?
+  | E;
+~~~
+
+Technically speaking, the newline can help disambiguate, but the parser as it
+is currently implemented does not distinguish between the various types of
+whitespace.
+
 ### Challenge 1: query contains synonyms of terms in string literals
 
 Consider the following type, representing a drink at a fast food restuarent:

@@ -51,11 +51,6 @@ test_cases = [
         "/* comment */\ntype a<A,B,C>=never;",
         "block comment with hint",
     ),
-    (
-        "type A = {\n  x: number; // Hint: trailing line comment}\  y: number;\n}\n",
-        "type A = {\n  x: number; // trailing line comment}\  y: number;\n}\n",
-        "inline line comment",
-    ),
     ("type A = B\ntype C = D", "type A=B;\ntype C=D;", "multi-line no semicolon"),
     ("type D={a:1,b:'text'};", 'type D={a:1,b:"text"};', "struct1"),
     ("type D={a:1,b:'text',};", 'type D={a:1,b:"text"};', "struct2"),
