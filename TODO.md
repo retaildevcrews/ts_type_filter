@@ -1,6 +1,10 @@
 # TODO
 
 Top Top Top
+* Fix unit tests
+* x Take new gotaglio
+  * x console.print(f"Complete menu tokens: TODO  ")
+
 * Bug: Array<A|B|C> filters to never if A is never, but (A|B|C)[] works
 * Normalizer
   * Bug: named types with no optional fields don't show up in defaults.

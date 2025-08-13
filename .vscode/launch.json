@@ -21,19 +21,33 @@
       ]
     },
     {
-      "name": "menu_pipeline2",
+      "name": "menu_pipeline3",
       "type": "debugpy",
       "request": "launch",
-      "program": "samples/menu/menu_pipeline2.py",
+      "program": "samples/menu/menu_pipeline3.py",
       "console": "integratedTerminal",
       // "justMyCode": false,
       "args": [
         "run",
-        "menu2",
+        "menu",
         "samples/menu/data/cases.json",
+        "prepare.menu=samples/menu/data/menu.ts",
+        "prepare.template=samples/menu/data/template.txt",
         "infer.model.name=perfect"
         // "format",
         // "9bfc"
+      ]
+    },
+    {
+      "name": "format menu_pipeline3",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "samples/menu/menu_pipeline3.py",
+      "console": "integratedTerminal",
+      // "justMyCode": false,
+      "args": [
+        "format",
+        "latest"
       ]
     },
     {
