@@ -2,6 +2,8 @@
 
 Top Top Top
 * Fix unit tests
+* TODO: consider creating full conversation history for all preceding turns.
+
 * x Take new gotaglio
   * x console.print(f"Complete menu tokens: TODO  ")
 
