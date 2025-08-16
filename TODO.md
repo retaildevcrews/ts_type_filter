@@ -1,6 +1,18 @@
 # TODO
 
 Top Top Top
+
+* Take new gotaglio from test.pypi.org
+* Take new gotaglio from pypi.org
+* Rename menu_pipeline.py, menu2.ipynb
+* x Take new gotaglio from github
+  * Rework prepare
+    * x Get previous cart from stages
+    * x Get all messages
+    * x Prune based on all messages and previous cart
+
+
+
 * Fix unit tests
 * TODO: consider creating full conversation history for all preceding turns.
 
