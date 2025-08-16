@@ -4,7 +4,7 @@ Top Top Top
 
 * Take new gotaglio from test.pypi.org
 * Take new gotaglio from pypi.org
-* Rename menu_pipeline.py, menu2.ipynb
+* x Rename menu_pipeline.py, menu2.ipynb
 * x Take new gotaglio from github
   * Rework prepare
     * x Get previous cart from stages
