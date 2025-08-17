@@ -2,8 +2,8 @@
 
 Top Top Top
 
-* Take new gotaglio from test.pypi.org
 * Take new gotaglio from pypi.org
+* x Take new gotaglio from test.pypi.org
 * x Rename menu_pipeline.py, menu2.ipynb
 * x Take new gotaglio from github
   * Rework prepare

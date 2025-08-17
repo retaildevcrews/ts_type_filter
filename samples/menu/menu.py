@@ -23,7 +23,7 @@ from gotaglio.pipeline_spec import (
     PipelineSpec,
     SummarizerSpec,
 )
-from gotaglio.pipeline2 import Internal, Prompt
+from gotaglio.pipeline import Internal, Prompt
 from gotaglio.repair import Repair
 from gotaglio.shared import build_template, to_json_string
 from gotaglio.summarize import keywords_column
@@ -183,7 +183,7 @@ def stages(name, config, registry):
         # For now, just collect strings from most resent cart.
         cart_literals = collect_string_literals(cart)
 
-        # Get all of he previous user queries.
+        # Get all of the previous user queries.
         # When i == 0 add place holder for missing system message.
         previous = (
             [None]
@@ -366,7 +366,7 @@ def expected(result):
     return get_turn(result)["expected"]
 
 
-def passed_predicate(result):
+def passed_predicate(result, turn_index=None):
     """
     Predicate function to determine if the result is considered passing.
     This checks if the assessment stage's result is zero, indicating
@@ -374,7 +374,7 @@ def passed_predicate(result):
 
     Used by the `format` and `summarize` sub-commands.
     """
-    return get_stages(result)["assess"]["cost"] == 0
+    return get_stages(result, turn_index)["assess"]["cost"] == 0
 
 
 ###############################################################################
