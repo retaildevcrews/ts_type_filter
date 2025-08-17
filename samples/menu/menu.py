@@ -62,10 +62,22 @@ from ts_type_filter import (
 # require configuration dicts.
 configuration = {
     "prepare": {
+        # Specifies whether prompt should include assistant messages
+        # in the conversational history.
+        "assistant_history": True,
+        # Specifies whether prompt should include user messages
+        # in the conversational history.
+        "user_history": True,
+        # Specifies whether the cart on turn entry should be the
+        # `extracted` cart from the previous turn (True) or the
+        # `expected` cart (False).
+        "linked_turns": True,
         "compress": False,
         "menu": "data/menu.ts",
         "prune": True,
         "template": Prompt("Template file for system message"),
+        # Internal cache of the template text read from `prepare.template`.
+        # This field is set by the stage() function.
         "template_text": Internal(),
     },
     "infer": {
@@ -151,6 +163,11 @@ def stages(name, config, registry):
     # are run.
     model = registry.model(glom(config, "infer.model.name"))
 
+    # Cache a few configuration values for the prepare stage.
+    assistant_history = glom(config, "prepare.assistant_history")
+    user_history = glom(config, "prepare.user_history")
+    linked_turns = glom(config, "prepare.linked_turns")
+
     # Define the pipeline stage functions. Each stage function is a coroutine
     # that takes a context dictionary as an argument.
     #
@@ -167,38 +184,59 @@ def stages(name, config, registry):
 
     # Stage 1:Create the system and user messages
     async def prepare(context):
-        case = context["case"]
         i = len(context["turns"]) - 1
 
-        #
-        # Prune the menu based on terms in the query and the cart
-        # Generate the pruning query based on the user query and the cart.
-        #
-
-        # Get all of the string literals from all of the previous carts.
-        carts = [case["cart"]] + [
-            turn["stages"]["extract"] for turn in context["turns"][:-1]
-        ]
-        cart = carts[-1]
-        # For now, just collect strings from most resent cart.
-        cart_literals = collect_string_literals(cart)
-
-        # Get all of the previous user queries.
-        # When i == 0 add place holder for missing system message.
-        previous = (
-            [None]
+        ###################################
+        # Prepare the assistant message that states the cart contents
+        # at the beginning of this turn.
+        cart = (
+            context["case"]["cart"]
             if i == 0
-            else context["turns"][i - 1]["stages"]["prepare"]["messages"]
+            else (
+                context["turns"][i - 1]["stages"]["extract"]
+                if linked_turns
+                else context["case"]["turns"][i - 1]["expected"]
+            )
         )
 
-        # Add the user query for the current turn.
-        assistant = {"role": "assistant", "content": to_json_string(cart)}
-        user = {"role": "user", "content": context["case"]["turns"][i]["query"]}
-        messages = previous[1:] + [assistant, user]
+        # Get previous assistant and user messages.
+        previous = [
+            x
+            for x in (context["turns"][i - 1]["stages"]["prepare"]["messages"] if i != 0 else [])
+            if x["role"] != "system"
+        ]
 
+        if not assistant_history:
+            # Want to keep the initial cart.
+            # Keep only the initial assistant message, filter out the rest
+            assistant_found = False
+            filtered = []
+            for x in previous:
+                if x["role"] == "assistant":
+                    # If we're suppressing user history, the also remove
+                    # the first cart.
+                    if not assistant_found and user_history:
+                        filtered.append(x)
+                        assistant_found = True
+                else:
+                    filtered.append(x)
+            previous = filtered
+
+        if not user_history:
+            previous = [x for x in previous if x["role"] != "user"]
+
+        # Prepare the assistant message that states the cart contents
+        assistant = {"role": "assistant", "content": to_json_string(cart)}
+
+        # Prepare the user message for this turn.
+        user = {"role": "user", "content": context["case"]["turns"][i]["user"]}
+
+        # Prune the menu based on terms in the query and the cart
+        # Generate the pruning query based on the user query and the cart.
         # Full pruning query is based on the previous user queries and string
         # literals found in previous carts.
-        user_queries = [m["content"] for m in messages if m["role"] == "user"]
+        user_queries = [m["content"] for m in previous if m["role"] == "user"] + [user["content"]]
+        cart_literals = collect_string_literals(cart)
         full_query = user_queries + cart_literals
 
         # Prune the menu based on the full query.
@@ -212,11 +250,64 @@ def stages(name, config, registry):
         # Create the system message, based on the pruned menu.
         system = {"role": "system", "content": await template({"menu": pruned})}
 
+        messages =  [system] + previous + [assistant, user]
+
         return {
-            "messages": [system] + messages,
+            "messages": messages,
             "full_query": full_query,
             "complete_tokens": complete_tokens,
         }
+
+
+        # ########################################
+        # #
+        # # Prune the menu based on terms in the query and the cart
+        # # Generate the pruning query based on the user query and the cart.
+        # #
+        
+
+        # # Get all of the string literals from all of the previous carts.
+        # carts = [case["cart"]] + [
+        #     turn["stages"]["extract"] for turn in context["turns"][:-1]
+        # ]
+        # cart = carts[-1]
+        # # For now, just collect strings from most resent cart.
+        # cart_literals = collect_string_literals(cart)
+
+        # # Get all of the previous user queries.
+        # # When i == 0 add place holder for missing system message.
+        # previous = (
+        #     [None]
+        #     if i == 0
+        #     else context["turns"][i - 1]["stages"]["prepare"]["messages"]
+        # )
+
+        # # Add the user query for the current turn.
+        # assistant = {"role": "assistant", "content": to_json_string(cart)}
+        # user = {"role": "user", "content": context["case"]["turns"][i]["user"]}
+        # messages = previous[1:] + [assistant, user]
+
+        # # Full pruning query is based on the previous user queries and string
+        # # literals found in previous carts.
+        # user_queries = [m["content"] for m in messages if m["role"] == "user"]
+        # full_query = user_queries + cart_literals
+
+        # # Prune the menu based on the full query.
+        # reachable = build_filtered_types(type_defs, symbols, indexer, full_query)
+        # pruned = (
+        #     serialize_menu(reachable, compress)
+        #     if str(config["prepare"]["prune"]) == "True"
+        #     else serialize_menu(type_defs, compress)
+        # )
+
+        # # Create the system message, based on the pruned menu.
+        # system = {"role": "system", "content": await template({"menu": pruned})}
+
+        # return {
+        #     "messages": [system] + messages,
+        #     "full_query": full_query,
+        #     "complete_tokens": complete_tokens,
+        # }
 
     # Stage 2: Invoke the model to generate a response
     async def infer(context):
@@ -296,7 +387,7 @@ def user_cell(result, turn_index):
     Provides contents and formatting for the user cell in the summary table.
     This cell displays the user input for the specified turn index.
     """
-    return get_turn(result, turn_index)["query"]
+    return get_turn(result, turn_index)["user"]
 
 
 ###############################################################################
@@ -305,7 +396,7 @@ def user_cell(result, turn_index):
 #
 ###############################################################################
 def format_turn(console: Console, turn_index, result: dict[str, Any]):
-    stages = get_result(result)
+    stages = get_result(result, turn_index)
     passed = passed_predicate(result)
     if passed:
         console.print(f"### Turn {turn_index + 1}: **PASSED**  ")
@@ -314,10 +405,10 @@ def format_turn(console: Console, turn_index, result: dict[str, Any]):
         console.print(f"### Turn {turn_index + 1}: **FAILED:** (cost={cost})  ")
     console.print()
 
-    input_tokens = sum(
+    input_tokens = sum([
         len(tokenizer.encode(message["content"]))
         for message in stages["stages"]["prepare"]["messages"]
-    )
+    ])
     complete_tokens = glom(stages, "stages.prepare.complete_tokens", default=None)
     console.print(f"Complete menu tokens: {complete_tokens}  ")
     console.print(

@@ -5,7 +5,7 @@
     "cart": { "items": [] },
     "turns": [
       {
-        "query": "a large wiseguy meal with coke",
+        "user": "a large wiseguy meal with coke",
         "expected": {
           "items": [
             {
@@ -29,7 +29,7 @@
     "cart": { "items": [] },
     "turns": [
       {
-        "query": "can I get a cheeseburger twofer",
+        "user": "can I get a cheeseburger twofer",
         "expected": {
           "items": [
             {
@@ -43,7 +43,7 @@
         }
       },
       {
-        "query": "can I get that with extra ketchup and a sprite",
+        "user": "can I get that with extra ketchup and a sprite",
         "expected": {
           "items": [
             {
@@ -73,7 +73,7 @@
     "cart": { "items": [] },
     "turns": [
       {
-        "query": "i want a a grilled chicken and a fish burger and two cokes",
+        "user": "i want a a grilled chicken and a fish burger and two cokes",
         "expected": {
           "items": [
             {
@@ -101,7 +101,7 @@
     "cart": { "items": [] },
     "turns": [
       {
-        "query": "i want a a grilled chicken and a fish burger and two cokes",
+        "user": "i want a a grilled chicken and a fish burger and two cokes",
         "expected": {
           "items": [
             {
@@ -122,7 +122,7 @@
         }
       },
       {
-        "query": "add bacon and extra mayo the chicken and 86 the fish",
+        "user": "add bacon and extra mayo the chicken and 86 the fish",
         "expected": {
           "items": [
             {
@@ -156,7 +156,7 @@
     "cart": { "items": [] },
     "turns": [
       {
-        "query": "can I a double wiseguy with no tomatoes and extra mayo",
+        "user": "can I a double wiseguy with no tomatoes and extra mayo",
         "expected": {
           "items": [
             {
