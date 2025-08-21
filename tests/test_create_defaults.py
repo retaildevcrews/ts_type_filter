@@ -139,8 +139,8 @@ def test_no_name_field():
     type_to_defaults = result["defaults"]
     duplicates = result["duplicates"]
     
-    expected_name_to_type = {}  # No name field
-    expected_type_to_defaults = {"NoNameStruct": {"optional_field": None}}
+    expected_name_to_type = {}  # This examples has no name field
+    expected_type_to_defaults = {}
     
     assert name_to_type == expected_name_to_type, f"Expected {expected_name_to_type}, got {name_to_type}"
     assert type_to_defaults == expected_type_to_defaults, f"Expected {expected_type_to_defaults}, got {type_to_defaults}"

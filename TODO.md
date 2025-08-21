@@ -3,6 +3,14 @@
 Top Top Top
 
 * Take new gotaglio from pypi.org
+* Merge turns into main
+* Normalizer
+  * Fix unit test
+  * Two modes - add default and remove default
+  * Generate directly from Typescript
+  * Document - rationale, usage
+  * Add coffee drinks and syrups to menu
+* Document TS commentting limitations and features (hint:)
 * x Take new gotaglio from test.pypi.org
 * x Rename menu_pipeline.py, menu2.ipynb
 * x Take new gotaglio from github
@@ -13,7 +21,7 @@ Top Top Top
 
 
 
-* Fix unit tests
+* x Fix unit tests
 * TODO: consider creating full conversation history for all preceding turns.
 
 * x Take new gotaglio
