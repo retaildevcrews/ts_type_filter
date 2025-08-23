@@ -18,6 +18,7 @@ from .filter import (
 from .parser import (
     parse,
 )
+from .validator import (create_validator)
 
 __all__ = [
     "Any",
@@ -27,6 +28,7 @@ __all__ = [
     "collect_string_literals",
     "create_normalizer",
     "create_normalizer_spec",
+    "create_validator",
     "merge_normalizer_specs",
     "normalize",
     "Define",

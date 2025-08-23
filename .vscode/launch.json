@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "test_validator",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "tests/test_validator.py",
+      "console": "integratedTerminal",
+      // "justMyCode": false,
+      "args": [
+      ]
+    },
+    {
       "name": "menu_pipeline",
       "type": "debugpy",
       "request": "launch",
