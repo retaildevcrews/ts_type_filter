@@ -89,16 +89,26 @@ def create_validator(types, root_name):
                 return bool
             else:
                 # For unknown types, fallback to Any
+                # raise ValueError(f"1: Unsupported TypeScript type: {ts_type.name}")
+                print(f"1: Unsupported TypeScript type: {ts_type.name}")
                 return Any
 
         elif isinstance(ts_type, Literal):
-            # For literals, create a pydantic model for a string with a constraint on the literal value
-            # if isinstance(ts_type.text, str):
-            pattern = r"^(" + "|".join(map(re.escape, [ts_type.text])) + r")$"
-            return Annotated[str, StringConstraints(pattern=pattern)]
+            # For literals, create a pydantic model for a string or int with a constraint on the literal value
+            if isinstance(ts_type.text, str):
+                pattern = r"^(" + "|".join(map(re.escape, [ts_type.text])) + r")$"
+                print(pattern)
+                return Annotated[str, StringConstraints(pattern=pattern)]
+            elif isinstance(ts_type.text, int):
+                # For integer literals, use Field with ge and le constraints
+                # This creates an int that must equal the literal value
+                return Annotated[int, Field(ge=ts_type.text, le=ts_type.text)]
+            else:
+                raise ValueError(f"Unsupported literal type: {type(ts_type.text)}")
 
         elif ts_type is TSAny:
             # For the 'any' type, use Python's Any
+            raise ValueError("Got TSAny")
             return Any
 
         elif isinstance(ts_type, Never):
@@ -108,7 +118,8 @@ def create_validator(types, root_name):
 
         else:
             # Default case
-            return Any
+            # return Any
+            raise ValueError(f"Unsupported TypeScript type: {ts_type}")
 
     # Create the root validator model
     root_model_type = convert_type(root_type.type)

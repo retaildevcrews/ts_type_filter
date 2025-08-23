@@ -25,7 +25,7 @@ from gotaglio.pipeline_spec import (
 )
 from gotaglio.pipeline import Internal, Prompt
 from gotaglio.repair import Repair
-from gotaglio.shared import build_template, to_json_string
+from gotaglio.shared import build_template, read_text_file, to_json_string
 from gotaglio.summarize import keywords_column
 from gotaglio.tokenizer import tokenizer
 
@@ -126,8 +126,7 @@ def stages(name, config, registry):
     # Read the contents of menu.ts into a string.
     # Use utf8 because of terms like "jalapeño".
     filename = glom(config, "prepare.menu")
-    with open(filename, "r", encoding="utf-8") as file:
-        menu_text = file.read()
+    menu_text = read_text_file(filename)
 
     # Parse the TypeScript type definitions
     # By parsing here, we ensure that any errors in the typescript

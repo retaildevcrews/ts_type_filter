@@ -104,7 +104,7 @@ class Node(ABC):
         Node.next_id += 1
 
     @abstractmethod
-    def format(self):
+    def format(self) -> str:
         pass
 
     @abstractmethod
@@ -112,7 +112,7 @@ class Node(ABC):
         pass
 
     @abstractmethod
-    def filter(self, nodes):
+    def filter(self, subgraph) -> "Node":
         pass
 
     @abstractmethod
@@ -130,7 +130,7 @@ class AnyNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -151,7 +151,7 @@ class FalseNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -172,7 +172,7 @@ class TrueNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -193,7 +193,7 @@ class StringNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -214,7 +214,7 @@ class NumberNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -235,7 +235,7 @@ class BooleanNode(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -259,8 +259,8 @@ class Array(Node):
     def index(self, symbols, indexer):
         self.type.index(symbols, indexer)
 
-    def filter(self, nodes):
-        t = self.type.filter(nodes)
+    def filter(self, subgraph):
+        t = self.type.filter(subgraph)
         return Array(t) if not isinstance(t, Never) else Never()
 
     def visit(self, subgraph, visitor):
@@ -344,7 +344,7 @@ class Never(Node):
     def index(self, symbols, indexer):
         pass
 
-    def filter(self, nodes):
+    def filter(self, subgraph):
         return self
 
     def visit(self, subgraph, visitor):
@@ -365,9 +365,9 @@ class ParamDef(Node):
             self.extends.index(symbols, indexer)
 
     # TODO: do we filter extends logic?
-    def filter(self, nodes):
+    def filter(self, subgraph):
         if self.extends:
-            t = self.extends.filter(nodes)
+            t = self.extends.filter(subgraph)
             if isinstance(t, Never):
                 return ParamDef(self.name, Never())
             return ParamDef(self.name, t)
@@ -390,9 +390,9 @@ class ParamRef(Node):
         self.type.index(symbols, indexer)
 
     # TODO: do we filter extends logic?
-    def filter(self, nodes):
+    def filter(self, subgraph):
         # TODO: code like in Type
-        type = self.type.filter(nodes)
+        type = self.type.filter(subgraph)
         if isinstance(type, Never):
             return Never()
         return self
