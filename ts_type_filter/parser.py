@@ -48,11 +48,11 @@ QUESTION: "?"
 
 literalex: "LITERAL" "<" string_literal "," string_literal_list "," boolean_literal ">"
 ?string_literal_list: "[" (string_literal ("," string_literal)*)? "]"
-?boolean_literal: TRUE | FALSE
+boolean_literal: TRUE | FALSE
 TRUE: "true"
 FALSE: "false"
 
-literal: numeric_literal | string_literal
+literal: numeric_literal | string_literal | boolean_literal
 numeric_literal: SIGNED_NUMBER
 string_literal: ESCAPED_STRING | ESCAPED_STRING2
 
@@ -197,6 +197,10 @@ def parse(text):
                 return int(items[0])
             except ValueError:
                 return float(items[0])
+
+        def boolean_literal(self, items):
+            # items[0] will be a Token with value "true" or "false"
+            return items[0].value == "true"
 
         def never(self, _):
             return Never()
