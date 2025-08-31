@@ -234,6 +234,23 @@ def generate_test_cases():
             "name": "typename",
         },
         {
+            "source": "type a = {x:B};type B=C;type C='hello'",
+            "root": "a",
+            "sub_cases": [
+                (
+                    {"x": "hello"},
+                    True,
+                    "legal fields",
+                ),
+                (
+                    {"x": True},
+                    False,
+                    "illegal fields",
+                ),
+            ],
+            "name": "typename_chaining",
+        },
+        {
             "source": "type A = B<C,D>;type B<X,Y>={x:X, y:Y};type C=number;type D=string",
             "root": "A",
             "sub_cases": [
@@ -248,7 +265,24 @@ def generate_test_cases():
                     "illegal fields",
                 ),
             ],
-            "name": "generics",
+            "name": "generics1",
+        },
+        {
+            "source": "type A = B<C,D>;type B<X,Y>={x:X, y:Y};type C=1;type D='hello'",
+            "root": "A",
+            "sub_cases": [
+                (
+                    {"x": 1, "y": "hello"},
+                    True,
+                    "legal fields",
+                ),
+                (
+                    {"x": True, "y": "hello"},
+                    False,
+                    "illegal fields",
+                ),
+            ],
+            "name": "generics2",
         },
     ]
 
