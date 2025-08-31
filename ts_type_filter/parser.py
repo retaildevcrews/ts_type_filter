@@ -186,7 +186,7 @@ def parse(text):
             text = items.pop(0)
             temp = items.pop(0)
             aliases = [temp] if isinstance(temp, str) else temp.children
-            pinned = True if items.pop(0) == "true" else False
+            pinned = True if items.pop(0) == True else False
             return Literal(text, aliases, pinned)
 
         def string_literal(self, items):
