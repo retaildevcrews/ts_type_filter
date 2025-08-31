@@ -6,21 +6,8 @@ from typing import Annotated, Any, List, Literal, Optional, Union as PyUnion
 
 
 from gotaglio.shared import read_text_file
-from ts_type_filter import create_validator, parse
-from ts_type_filter import Literal as TSLiteral
-
-# test_cases = [
-#     {
-#         "source": "type a = 'hello",
-#         "root": "a",
-#         "sub_cases": [
-#             ("hello", True, "matching string literal"),
-#             ("other", True, "disallowed string literal"),
-#             (123, True, "disallowed number")
-#         ],
-#         "name": "string literal"
-#     }
-# ]
+from ts_type_filter import create_validator3, parse
+from ts_type_filter import Literal as TSLiteral, Struct as TSStruct
 
 
 def generate_test_cases():
@@ -54,7 +41,66 @@ def generate_test_cases():
                 ("hello", False, "disallowed string"),
             ],
             "name": "boolean literal",
-        }
+        },
+        {
+            "source": "type a = {x: 1, y?: 'hello'}",
+            "root": "a",
+            "sub_cases": [
+                ({"x": 1, "y": "hello"}, True, "required and optional"),
+                ({"x": 1}, True, "required only"),
+                ({"y": "hello"}, False, "missing required"),
+                ({"x": 1, "z": 1}, False, "unexpected field"),
+                ({"x": 1, "y": "goodbye"}, False, "incorrect type for y"),
+                ({"x": "what", "y": "hello"}, False, "incorrect type for x"),
+                ({"x": True, "y": "hello"}, False, "incorrect type for x (2)"),
+                ({"x": [True], "y": "hello"}, False, "incorrect type for x (3)"),
+            ],
+            "name": "struct",
+        },
+        {
+            "source": "type a = {x: 1, y?: 'hello'}[]",
+            "root": "a",
+            "sub_cases": [
+                (
+                    [
+                        {"x": 1, "y": "hello"},
+                        {"x": 1},
+                    ],
+                    True,
+                    "legal element types",
+                ),
+                ([], True, "empty array"),
+                ([1], False, "illegal element type"),
+            ],
+            "name": "array",
+        },
+        {
+            "source": "type a = 1 | 2 | 'hello'",
+            "root": "a",
+            "sub_cases": [
+                (
+                    1,
+                    True,
+                    "legal element types 1",
+                ),
+                (
+                    2,
+                    True,
+                    "legal element types 2",
+                ),
+                (
+                    "hello",
+                    True,
+                    "legal element types 'hello'",
+                ),
+                (
+                    123,
+                    False,
+                    "illegal element type 123",
+                ),
+            ],
+            "name": "union",
+        },
     ]
 
     flattened = []
@@ -86,10 +132,10 @@ test_params, test_ids = generate_test_cases()
 )
 def test_validator_generated(source, root, input_value, expected, description):
     type_defs = parse(source)
-    validator = create_validator2(type_defs, root)
+    validator = create_validator3(type_defs, root)
     try:
         # validator.model_validate(input_value)
-        validator(value=input_value)
+        x = validator(value=input_value)
         result = True
     except Exception as e:
         result = False
@@ -98,42 +144,75 @@ def test_validator_generated(source, root, input_value, expected, description):
     # Your validation logic here
 
 
-def create_validator2(types, root_name):
-    # types is a list of Node objects, each of which has a `name` parameter
-    # find type with matching root_name of None
-    root_type = next(
-        (t for t in types if t.name == root_name), None
-    )
-    if not root_type:
-        raise ValueError(f"Unknown root type: {root_name}")
+# def create_validator2(types, root_name):
+#     # types is a list of Node objects, each of which has a `name` parameter
+#     # find type with matching root_name of None
+#     root_type = next(
+#         (t for t in types if t.name == root_name), None
+#     )
+#     if not root_type:
+#         raise ValueError(f"Unknown root type: {root_name}")
 
-    ts_type = root_type.type
-    if isinstance(ts_type, TSLiteral):
-        # Dynamically create the Literal type
-        literal_type = Literal[ts_type.text]
-        
-        # Use create_model to dynamically create the validator class
-        Container = create_model(
-            'Container',
-            value=(literal_type, ...)
-        )
-        return Container
+#     ts_type = root_type.type
+#     if isinstance(ts_type, TSLiteral):
+#         # Dynamically create the Literal type
+#         literal_type = Literal[ts_type.text]
 
-        # class Container(BaseModel):
-        #     value: Literal[ts_type.text]
-        # symbol_table = {t.name: t for t in types}
+#         # Use create_model to dynamically create the validator class
+#         Container = create_model(
+#             'Container',
+#             value=(literal_type, ...)
+#         )
+#         return Container
+
+#         # class Container(BaseModel):
+#         #     value: Literal[ts_type.text]
+#         # symbol_table = {t.name: t for t in types}
+#     elif True:
+#         if isinstance(ts_type, TSStruct):
+#             # For a TypeScript object/struct, create nested Pydantic model
+#             fields = {}
+
+#             model_name = f"DynamicModel_{id(ts_type)}"
+
+#             # Raise an exception if recursion is detected
+#             if model_name in created_models:
+#                 raise ValueError(f"Recursive type detected: {model_name}")
+
+#             for field_name, field_type in ts_type.obj.items():
+#                 is_optional = field_name.endswith("?")
+#                 actual_name = field_name.rstrip("?")
+
+#                 field_pydantic_type = convert_type(
+#                     field_type,
+#                     required=not is_optional,
+#                 )
+
+#                 # Make non-required fields Optional
+#                 if not required or is_optional:
+#                     field_pydantic_type = Optional[field_pydantic_type]
+
+#                 fields[actual_name] = (
+#                     field_pydantic_type,
+#                     Field(...) if required and not is_optional else None,
+#                 )
+
+#             # Create a dynamic Pydantic model
+#             model = create_model(model_name, **fields)
+#             created_models[model_name] = model
+#             return model
 
 #     pattern = r"^(" + "|".join(map(re.escape, [ts_type.text])) + r")$"
 #     print(pattern)
 #     return Annotated[str, StringConstraints(pattern=pattern)]
 
 
-    # def validate(data):
-    #     # Your validation logic here
-    #     if data != 'hello':
-    #         raise ValueError("Invalid data")
+# def validate(data):
+#     # Your validation logic here
+#     if data != 'hello':
+#         raise ValueError("Invalid data")
 
-    # return validate
+# return validate
 
 
 # @pytest.mark.parametrize(

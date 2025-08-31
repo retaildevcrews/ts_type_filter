@@ -19,6 +19,7 @@ from .parser import (
     parse,
 )
 from .validator import (create_validator)
+from .validator2 import (create_validator3)
 
 __all__ = [
     "Any",
@@ -29,6 +30,7 @@ __all__ = [
     "create_normalizer",
     "create_normalizer_spec",
     "create_validator",
+    "create_validator3",
     "merge_normalizer_specs",
     "normalize",
     "Define",
