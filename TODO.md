@@ -2,6 +2,10 @@
 
 Top Top Top
 
+* Make Symbols in validator.py threadsafe
+* Rework validator - are custom validators really necessary?
+* Unit test hierarchy for validator
+
 * Take new gotaglio from pypi.org
 * Merge turns into main
 * Normalizer
