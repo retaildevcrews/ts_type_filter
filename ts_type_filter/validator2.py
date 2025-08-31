@@ -7,14 +7,17 @@ from pydantic import (
     StringConstraints,
     BeforeValidator,
 )
-from typing import Annotated, Any, List, Literal, Optional, Union
+from typing import Annotated, Any, List, Literal, Never, Optional, Type, Union
 
 from ts_type_filter import (
+    Any as TS_Any,
     Array as TS_Array,
     Define as TS_Define,
     Literal as TS_Literal,
+    Never as TS_Never,
     Struct as TS_Struct,
     Union as TS_Union,
+    Type as TS_Type,
 )
 
 
@@ -35,19 +38,28 @@ def create_validator3(types, root_name):
 
     created_models = {}
 
-    # # types is a list of Node objects, each of which has a `name` parameter
-    # # find type with matching root_name of None
-    # root_type = next(
-    #     (t for t in types if t.name == root_name), None
-    # )
-    # if not root_type:
-    #     raise ValueError(f"Unknown root type: {root_name}")
-
-    ts_type = root_type.type
-
     # Recursive function to convert TypeScript types to Pydantic types
     def convert_type(ts_type, required=True, path=""):
-        if isinstance(ts_type, TS_Literal):
+        if isinstance(ts_type, TS_Type):
+            if ts_type.name in symbol_table:
+                if ts_type.name not in created_models:
+                    type_def = symbol_table[ts_type.name]
+                    model_type = convert_type(type_def.type)
+                    created_models[ts_type.name] = model_type
+                return created_models[ts_type.name]
+            elif ts_type.name == "string":
+                return str
+            elif ts_type.name == "number":
+                return float  # Using float for all numbers for simplicity
+            elif ts_type.name == "boolean":
+                return bool
+            elif ts_type.name == "any":
+                return Any
+            elif ts_type.name == "never":
+                return Never
+            else:
+                raise ValueError(f"Unknown type: {ts_type.name}")
+        elif isinstance(ts_type, TS_Literal):
             # Create a strict validator that checks exact type and value
             literal_value = ts_type.text
             literal_type = type(literal_value)
@@ -104,14 +116,18 @@ def create_validator3(types, root_name):
             if len(union_types) == 1:
                 return union_types[0]
             return Union[tuple(union_types)]
+        # elif isinstance(ts_type, TS_Any):
+        #     return Any
+        # elif isinstance(ts_type, TS_Never):
+        #     return Never
         else:
             raise ValueError("Unsupported type")
 
     root_model_type = convert_type(root_type.type)
 
-    Container = create_model(
-        "Container",
+    Validator = create_model(
+        "Validator",
         value=(root_model_type, ...),
         __config__=ConfigDict(strict=True, extra="forbid"),
     )
-    return Container
+    return Validator

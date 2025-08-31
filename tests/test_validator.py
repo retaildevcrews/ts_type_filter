@@ -101,6 +101,121 @@ def generate_test_cases():
             ],
             "name": "union",
         },
+        {
+            "source": "type a = boolean",
+            "root": "a",
+            "sub_cases": [
+                (
+                    True,
+                    True,
+                    "legal True",
+                ),
+                (
+                    False,
+                    True,
+                    "legal False",
+                ),
+                (
+                    1,
+                    False,
+                    "illegal 1",
+                ),
+                (
+                    0,
+                    False,
+                    "illegal 0",
+                ),
+            ],
+            "name": "bool",
+        },
+        {
+            "source": "type a = number",
+            "root": "a",
+            "sub_cases": [
+                (
+                    123,
+                    True,
+                    "legal 123",
+                ),
+                (
+                    False,
+                    False,
+                    "illegal False",
+                ),
+                (
+                    "hello",
+                    False,
+                    "illegal hello",
+                ),
+            ],
+            "name": "number",
+        },
+        {
+            "source": "type a = string",
+            "root": "a",
+            "sub_cases": [
+                (
+                    "hello",
+                    True,
+                    "legal hello",
+                ),
+                (
+                    False,
+                    False,
+                    "illegal False",
+                ),
+                (
+                    123,
+                    False,
+                    "illegal 123",
+                ),
+            ],
+            "name": "string",
+        },
+        {
+            "source": "type a = any",
+            "root": "a",
+            "sub_cases": [
+                (
+                    "hello",
+                    True,
+                    "legal hello",
+                ),
+                (
+                    False,
+                    True,
+                    "legal False",
+                ),
+                (
+                    123,
+                    True,
+                    "legal 123",
+                ),
+            ],
+            "name": "any",
+        },
+        {
+            "source": "type a = never",
+            "root": "a",
+            "sub_cases": [
+                (
+                    "hello",
+                    False,
+                    "illegal hello",
+                ),
+                (
+                    False,
+                    False,
+                    "illegal False",
+                ),
+                (
+                    123,
+                    False,
+                    "illegal 123",
+                ),
+            ],
+            "name": "never",
+        },
     ]
 
     flattened = []
