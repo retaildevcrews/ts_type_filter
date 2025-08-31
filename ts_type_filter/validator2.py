@@ -56,7 +56,9 @@ def create_validator3(types, root_name):
             elif ts_type.name == "any":
                 return Any
             elif ts_type.name == "never":
-                return Never
+                def never_validator(v):
+                    raise ValueError("Never type should never have a value")
+                return Annotated[Any, BeforeValidator(never_validator)]
             else:
                 raise ValueError(f"Unknown type: {ts_type.name}")
         elif isinstance(ts_type, TS_Literal):
