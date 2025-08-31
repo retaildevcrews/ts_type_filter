@@ -5,6 +5,7 @@ from pydantic import (
     Field,
     field_validator,
     StringConstraints,
+    BeforeValidator,
 )
 from typing import Annotated, Any, List, Literal, Optional, Union
 
@@ -47,8 +48,19 @@ def create_validator3(types, root_name):
     # Recursive function to convert TypeScript types to Pydantic types
     def convert_type(ts_type, required=True, path=""):
         if isinstance(ts_type, TS_Literal):
-            return Literal[ts_type.text]
-            # return Annotated[Literal[ts_type.text], Field(strict=True)]
+            # Create a strict validator that checks exact type and value
+            literal_value = ts_type.text
+            literal_type = type(literal_value)
+            
+            def create_strict_validator(expected_value, expected_type):
+                def validator(v):
+                    if type(v) is not expected_type or v != expected_value:
+                        raise ValueError(f"Expected exactly {expected_type.__name__}({expected_value}), got {type(v).__name__}({v})")
+                    return v
+                return validator
+            
+            # Use Annotated with BeforeValidator for strict type checking
+            return Annotated[Literal[literal_value], BeforeValidator(create_strict_validator(literal_value, literal_type))]
         elif isinstance(ts_type, TS_Struct):
             # For a TypeScript object/struct, create nested Pydantic model
             fields = {}
