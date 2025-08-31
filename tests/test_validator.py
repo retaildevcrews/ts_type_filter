@@ -216,6 +216,40 @@ def generate_test_cases():
             ],
             "name": "never",
         },
+        {
+            "source": "type a = {x:B, y:C};type B=number;type C=string",
+            "root": "a",
+            "sub_cases": [
+                (
+                    {"x": 123, "y": "hello"},
+                    True,
+                    "legal fields",
+                ),
+                (
+                    {"x": True, "y": "hello"},
+                    False,
+                    "illegal fields",
+                ),
+            ],
+            "name": "typename",
+        },
+        {
+            "source": "type A = B<C,D>;type B<X,Y>={x:X, y:Y};type C=number;type D=string",
+            "root": "A",
+            "sub_cases": [
+                (
+                    {"x": 123, "y": "hello"},
+                    True,
+                    "legal fields",
+                ),
+                (
+                    {"x": True, "y": "hello"},
+                    False,
+                    "illegal fields",
+                ),
+            ],
+            "name": "generics",
+        },
     ]
 
     flattened = []
