@@ -16,23 +16,16 @@ from ts_type_filter import (
 )
 
 
-# TODO: make this threadsafe
 class Symbols:
-    def __init__(self, bindings: dict[str, Any] = None):
-        self._context = []
-        if bindings:
-            self.push(bindings)
-
-    def push(self, bindings: dict[str, Any]):
-        self._context.append(bindings)
-
-    def pop(self):
-        self._context.pop()
+    def __init__(self, bindings: dict[str, Any], parent: Optional["Symbols"] = None):
+        self._bindings = bindings
+        self._parent = parent
 
     def get(self, name):
-        for bindings in reversed(self._context):
-            if name in bindings:
-                return bindings[name]
+        if name in self._bindings:
+            return self._bindings[name]
+        if self._parent:
+            return self._parent.get(name)
         return None
 
 
@@ -42,7 +35,7 @@ def create_validator(types, root_name):
     for t in types:
         if isinstance(t, TS_Define):
             bindings[t.name] = t
-        symbols = Symbols(bindings)
+    symbols = Symbols(bindings)
 
     # Find the root type definition based on root_name
     root_type = symbols.get(root_name)
@@ -59,7 +52,7 @@ def create_validator(types, root_name):
     # type D='hello';
 
     # Recursive function to convert TypeScript types to Pydantic types
-    def convert_type(ts_type, required=True):
+    def convert_type(symbols: Symbols, ts_type, required=True):
         if isinstance(ts_type, TS_Type):
             type_def = symbols.get(ts_type.name)
             if type_def:
@@ -74,23 +67,17 @@ def create_validator(types, root_name):
                         else:
                             raise ValueError("Parameter mismatch")
                         
-                        # Push the param bindings onto symbols
-                        symbols.push(param_bindings)
-                        
                         # Create the validator for type_def in this context
-                        model_type = convert_type(type_def.type)
-
-                        # Pop the symbols
-                        symbols.pop()
+                        model_type = convert_type(Symbols(param_bindings, symbols), type_def.type)
                         
                         return model_type
                     else:
                         if ts_type.name not in created_models:
-                            model_type = convert_type(type_def.type)
+                            model_type = convert_type(symbols, type_def.type)
                             created_models[ts_type.name] = model_type
                         return created_models[ts_type.name]
                 else:
-                    return convert_type(type_def)
+                    return convert_type(symbols, type_def)
             elif ts_type.name == "string":
                 return str
             elif ts_type.name == "number":
@@ -142,6 +129,7 @@ def create_validator(types, root_name):
                 actual_name = field_name.rstrip("?")
 
                 field_pydantic_type = convert_type(
+                    symbols,
                     field_type,
                     required=not is_optional,
                 )
@@ -162,11 +150,11 @@ def create_validator(types, root_name):
             created_models[model_name] = model
             return model
         elif isinstance(ts_type, TS_Array):
-            element_type = convert_type(ts_type.type)
+            element_type = convert_type(symbols, ts_type.type)
             return List[element_type]
         elif isinstance(ts_type, TS_Union):
             # For unions, create a Union of all possible types
-            union_types = [convert_type(t) for t in ts_type.types]
+            union_types = [convert_type(symbols, t) for t in ts_type.types]
             if len(union_types) == 1:
                 return union_types[0]
             return Union[tuple(union_types)]
@@ -177,7 +165,7 @@ def create_validator(types, root_name):
         else:
             raise ValueError("Unsupported type")
 
-    root_model_type = convert_type(root_type.type)
+    root_model_type = convert_type(symbols, root_type.type)
 
     Validator = create_model(
         "Validator",
