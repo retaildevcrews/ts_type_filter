@@ -7,6 +7,7 @@ from pydantic import (
 from typing import Annotated, Any, List, Literal, Optional, Union
 
 from ts_type_filter import (
+    Any as TS_Any,
     Array as TS_Array,
     Define as TS_Define,
     Literal as TS_Literal,
@@ -27,6 +28,23 @@ class Symbols:
         if self._parent:
             return self._parent.get(name)
         return None
+
+    def rewind(self, name):
+        if self._parent is not None:
+            if name in self._bindings:
+                return self._parent
+            else:
+                return self._parent.rewind(name)
+        elif name in self._bindings:
+            return self
+        else:
+            raise ValueError(f"Symbol '{name}' not found")
+        # if self._parent is None:
+        #     raise ValueError(f"Symbol '{name}' not found")
+        # if name in self._bindings:
+        #     return self._parent
+        # else:
+        #     return self._parent.rewind(name)
 
 
 def create_validator(types, root_name):
@@ -73,10 +91,24 @@ def convert(model_cache: dict[str, Any], symbols: Symbols, ts_type, required):
         return List[element_type]
     elif isinstance(ts_type, TS_Union):
         # For unions, create a Union of all possible types
-        union_types = [convert(model_cache, symbols, t, required) for t in ts_type.types]
+        if (
+            len(ts_type.types) == 2
+            and isinstance(ts_type.types[0], TS_Type)
+            and ts_type.types[0].name == "FrenchFries"
+            and isinstance(ts_type.types[1], TS_Type)
+            and ts_type.types[1].name == "CHOOSE"
+        ):
+            a = convert(model_cache, symbols, ts_type.types[0], required)
+            b = convert(model_cache, symbols, ts_type.types[1], required)
+            print("here")
+        union_types = [
+            convert(model_cache, symbols, t, required) for t in ts_type.types
+        ]
         if len(union_types) == 1:
             return union_types[0]
         return Union[tuple(union_types)]
+    elif ts_type is TS_Any:
+        return Any
     else:
         raise ValueError("Unsupported type")
 
@@ -93,7 +125,18 @@ def convert_define(
         param_bindings = {}
         if params and len(params) == len(type_def.params):
             for param_def, param_ref in zip(type_def.params, params):
-                param_type = symbols.get(param_ref.name).type
+                # All regular tests pass
+                # Unknown type SIZE
+                param_type = param_ref
+
+                # Union doesn't have name field
+                # param_type = symbols.get(param_ref.name)
+ 
+                # All regular tests pass
+                # param_type = param_ref.extends if hasattr(param_ref, "extends") else TS_Any
+ 
+                # param_type = convert(model_cache, symbols, param_ref, True)
+                # param_type = symbols.get(param_ref.name).type
                 param_bindings[param_def.name] = param_type
         else:
             raise ValueError("Parameter mismatch")
@@ -138,12 +181,27 @@ def convert_literal(
 def convert_type(
     model_cache: dict[str, Any], symbols: Symbols, ts_type: TS_Type, required
 ):
+    # error
+    """
+    Problem is infinite recursion converting `SIZE`
+       WiseguyMeal<SIZE extends ComboSize>
+       FrenchFries<SIZE extends FrenchFriesSize>
+
+    Seems when we look up a type_def using symbols.get(ts_type.name),
+    we want the symbols at the time the type_def was made
+    """
     type_def = symbols.get(ts_type.name)
     if type_def:
+        # This causes infinite recursion
+        # rewind = symbols
+        # This symbol table doesn't have SIZE (since it was rewound)
+        rewind = symbols.rewind(ts_type.name)
         if isinstance(type_def, TS_Define):
-            return convert_define(model_cache, symbols, type_def, ts_type.params, required)
+            return convert_define(
+                model_cache, rewind, type_def, ts_type.params, required
+            )
         else:
-            return convert(model_cache, symbols, type_def, required)
+            return convert(model_cache, rewind, type_def, required)
     elif ts_type.name == "string":
         return str
     elif ts_type.name == "number":

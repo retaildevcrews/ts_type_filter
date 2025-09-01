@@ -2,6 +2,7 @@ from .normalize import create_normalizer, create_normalizer_spec, merge_normaliz
 from .inverted_index import Index
 from .filter import (
     Any,
+    AnyNode,
     Array,
     build_filtered_types,
     build_type_index,
@@ -22,6 +23,7 @@ from .validator import (create_validator)
 
 __all__ = [
     "Any",
+    "AnyNode",
     "Array",
     "build_filtered_types",
     "build_type_index",

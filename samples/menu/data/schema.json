@@ -1,0 +1,2086 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Amount": {
+            "enum": [
+                "Extra",
+                "Light",
+                "No",
+                "Regular"
+            ],
+            "type": "string"
+        },
+        "ChooseDrink<ComboSizes>": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "name": {},
+                        "options": {
+                            "items": {
+                                "properties": {
+                                    "amount": {
+                                        "enum": [
+                                            "Light",
+                                            "No",
+                                            "Regular"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "const": "Ice",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "size": {
+                            "$ref": "#/definitions/SIZE"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "const": "CHOOSE",
+                    "type": "string"
+                }
+            ]
+        },
+        "ExtraAmount": {
+            "enum": [
+                "No",
+                "Regular",
+                "extra"
+            ],
+            "type": "string"
+        },
+        "Item": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "drink": {
+                            "$ref": "#/definitions/ChooseDrink<ComboSizes>"
+                        },
+                        "fries": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "French Fries",
+                                                "Onion Rings",
+                                                "Sweet Potato Fries"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "size": {
+                                            "$ref": "#/definitions/SIZE"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "name": {
+                            "const": "Wiseguy Meal",
+                            "type": "string"
+                        },
+                        "sandwich": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "$ref": "#/definitions/NAME"
+                                        },
+                                        "options": {
+                                            "anyOf": [
+                                                {
+                                                    "properties": {
+                                                        "amount": {
+                                                            "$ref": "#/definitions/ExtraAmount"
+                                                        },
+                                                        "name": {
+                                                            "enum": [
+                                                                "Jalapeños",
+                                                                "Lettuce",
+                                                                "Onion",
+                                                                "Pickles",
+                                                                "Tomato"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "amount": {
+                                                            "$ref": "#/definitions/Amount"
+                                                        },
+                                                        "name": {
+                                                            "enum": [
+                                                                "Green Goddess Sauce",
+                                                                "Smokey Sauce"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            ]
+                                        },
+                                        "type": {
+                                            "enum": [
+                                                "CHOOSE",
+                                                "Regular",
+                                                "With Bacon",
+                                                "With Bacon and Cheese",
+                                                "With Cheese"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "size": {
+                            "$ref": "#/definitions/SIZE"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "drink": {
+                            "$ref": "#/definitions/ChooseDrink<ComboSizes>"
+                        },
+                        "fries": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "French Fries",
+                                                "Onion Rings",
+                                                "Sweet Potato Fries"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "size": {
+                                            "$ref": "#/definitions/SIZE"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "name": {
+                            "const": "Meal",
+                            "type": "string"
+                        },
+                        "sandwich": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "$ref": "#/definitions/NAME"
+                                        },
+                                        "options": {
+                                            "anyOf": [
+                                                {
+                                                    "properties": {
+                                                        "amount": {
+                                                            "$ref": "#/definitions/ExtraAmount"
+                                                        },
+                                                        "name": {
+                                                            "enum": [
+                                                                "Jalapeños",
+                                                                "Lettuce",
+                                                                "Onion",
+                                                                "Pickles",
+                                                                "Tomato"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "amount": {
+                                                            "$ref": "#/definitions/Amount"
+                                                        },
+                                                        "name": {
+                                                            "enum": [
+                                                                "Green Goddess Sauce",
+                                                                "Smokey Sauce"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            ]
+                                        },
+                                        "type": {
+                                            "enum": [
+                                                "CHOOSE",
+                                                "Regular",
+                                                "With Bacon",
+                                                "With Bacon and Cheese",
+                                                "With Cheese"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "Bacon Melt",
+                                                "Hero Melt",
+                                                "Mushroom and Swiss Melt"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Green Goddess Sauce",
+                                                                    "Smokey Sauce"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "$ref": "#/definitions/NAME_1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "$ref": "#/definitions/NAME_2"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Green Goddess Sauce",
+                                                                    "Smokey Sauce"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "$ref": "#/definitions/NAME_1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Cut in Half",
+                                                                    "Low Carb",
+                                                                    "Plain"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Onion Rings"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "$ref": "#/definitions/NAME_3"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "American Cheese",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "Seasame Soy Chicken",
+                                                "Spicy Garlic Chicken",
+                                                "Sweet and Spicy Chicken"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Green Goddess Sauce",
+                                                                    "Smokey Sauce"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "$ref": "#/definitions/NAME_1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Cut in Half",
+                                                                    "Low Carb",
+                                                                    "Plain"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Onion Rings"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "Lemon Chicken Pita",
+                                                "Smokey Chicken Pita",
+                                                "Tangy Chicken Pita"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Green Goddess Sauce",
+                                                                    "Smokey Sauce"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "$ref": "#/definitions/NAME_1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Onion Rings"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "const": "Captain Nemo Burger",
+                                            "type": "string"
+                                        },
+                                        "options": {
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Lettuce",
+                                                                    "Onion",
+                                                                    "Pickles",
+                                                                    "Tomato"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "const": "Bacon",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "$ref": "#/definitions/NAME_1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Amount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "BBQ",
+                                                                    "Ketchup",
+                                                                    "Mayo",
+                                                                    "Mustard"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/Optional"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Cut in Half",
+                                                                    "Low Carb",
+                                                                    "Plain"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "amount": {
+                                                                "$ref": "#/definitions/ExtraAmount"
+                                                            },
+                                                            "name": {
+                                                                "enum": [
+                                                                    "Jalapeños",
+                                                                    "Onion Rings"
+                                                                ],
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "size": {
+                            "$ref": "#/definitions/SIZE"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/NAME"
+                        },
+                        "options": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "amount": {
+                                            "$ref": "#/definitions/ExtraAmount"
+                                        },
+                                        "name": {
+                                            "enum": [
+                                                "Jalapeños",
+                                                "Lettuce",
+                                                "Onion",
+                                                "Pickles",
+                                                "Tomato"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "amount": {
+                                            "$ref": "#/definitions/Amount"
+                                        },
+                                        "name": {
+                                            "enum": [
+                                                "Green Goddess Sauce",
+                                                "Smokey Sauce"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "type": {
+                            "enum": [
+                                "CHOOSE",
+                                "Regular",
+                                "With Bacon",
+                                "With Bacon and Cheese",
+                                "With Cheese"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "enum": [
+                                "Bacon Melt",
+                                "Hero Melt",
+                                "Mushroom and Swiss Melt"
+                            ],
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Green Goddess Sauce",
+                                                    "Smokey Sauce"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/NAME_2"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Green Goddess Sauce",
+                                                    "Smokey Sauce"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Cut in Half",
+                                                    "Low Carb",
+                                                    "Plain"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Onion Rings"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/NAME_3"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "American Cheese",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "enum": [
+                                "Seasame Soy Chicken",
+                                "Spicy Garlic Chicken",
+                                "Sweet and Spicy Chicken"
+                            ],
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Green Goddess Sauce",
+                                                    "Smokey Sauce"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Cut in Half",
+                                                    "Low Carb",
+                                                    "Plain"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Onion Rings"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "enum": [
+                                "Lemon Chicken Pita",
+                                "Smokey Chicken Pita",
+                                "Tangy Chicken Pita"
+                            ],
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Green Goddess Sauce",
+                                                    "Smokey Sauce"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Onion Rings"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Captain Nemo Burger",
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Cut in Half",
+                                                    "Low Carb",
+                                                    "Plain"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Onion Rings"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Twofer Combo",
+                            "type": "string"
+                        },
+                        "one": {
+                            "$ref": "#/definitions/TwoThreeChoices"
+                        },
+                        "two": {
+                            "$ref": "#/definitions/TwoThreeChoices"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Threefer Combo",
+                            "type": "string"
+                        },
+                        "one": {
+                            "$ref": "#/definitions/TwoThreeChoices"
+                        },
+                        "three": {
+                            "$ref": "#/definitions/TwoThreeChoices"
+                        },
+                        "two": {
+                            "$ref": "#/definitions/TwoThreeChoices"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "enum": [
+                                "French Fries",
+                                "Onion Rings",
+                                "Sweet Potato Fries"
+                            ],
+                            "type": "string"
+                        },
+                        "size": {}
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {},
+                        "sauce": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "BBQ Dipping Sauce",
+                                                "Buffalo Dipping Sauce",
+                                                "Cool Ranch Dipping Sauce",
+                                                "Honey Mustard Dipping Sauce",
+                                                "Nacho Dipping Sauce",
+                                                "None"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "size": {}
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {},
+                        "options": {
+                            "items": {
+                                "properties": {
+                                    "amount": {
+                                        "enum": [
+                                            "Light",
+                                            "No",
+                                            "Regular"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "const": "Ice",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "size": {}
+                    },
+                    "type": "object"
+                }
+            ]
+        },
+        "NAME": {
+            "enum": [
+                "Double Wiseguy",
+                "Down East Wiseguy",
+                "Triple Wiseguy",
+                "Vegan Wiseguy",
+                "Wiseguy"
+            ],
+            "type": "string"
+        },
+        "NAME_1": {
+            "enum": [
+                "American Cheese",
+                "Cheddar Cheese",
+                "Swiss Cheese"
+            ],
+            "type": "string"
+        },
+        "NAME_2": {
+            "enum": [
+                "Bacon Cheeseburger",
+                "Bacon Double Cheeseburger",
+                "Cheeseburger",
+                "Double Cheeseburger"
+            ],
+            "type": "string"
+        },
+        "NAME_3": {
+            "enum": [
+                "Cordon Bleu",
+                "Grilled Chicken Sandwich"
+            ],
+            "type": "string"
+        },
+        "NAME_4": {
+            "enum": [
+                "Coca-Cola",
+                "Diet Coke",
+                "Dr. Pepper",
+                "Sprite"
+            ],
+            "type": "string"
+        },
+        "Optional": {
+            "enum": [
+                "No",
+                "Regular"
+            ],
+            "type": "string"
+        },
+        "SIZE": {
+            "enum": [
+                "CHOOSE",
+                "Large",
+                "Medium",
+                "Small"
+            ],
+            "type": "string"
+        },
+        "TwoThreeChoices": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/NAME"
+                        },
+                        "options": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "amount": {
+                                            "$ref": "#/definitions/ExtraAmount"
+                                        },
+                                        "name": {
+                                            "enum": [
+                                                "Jalapeños",
+                                                "Lettuce",
+                                                "Onion",
+                                                "Pickles",
+                                                "Tomato"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "amount": {
+                                            "$ref": "#/definitions/Amount"
+                                        },
+                                        "name": {
+                                            "enum": [
+                                                "Green Goddess Sauce",
+                                                "Smokey Sauce"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "type": {
+                            "enum": [
+                                "CHOOSE",
+                                "Regular",
+                                "With Bacon",
+                                "With Bacon and Cheese",
+                                "With Cheese"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Grilled Chicken Sandwich",
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "American Cheese",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Bacon Cheeseburger",
+                            "type": "string"
+                        },
+                        "options": {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Lettuce",
+                                                    "Onion",
+                                                    "Pickles",
+                                                    "Tomato"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Green Goddess Sauce",
+                                                    "Smokey Sauce"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "const": "Bacon",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "$ref": "#/definitions/NAME_1"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Amount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "BBQ",
+                                                    "Ketchup",
+                                                    "Mayo",
+                                                    "Mustard"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/Optional"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Cut in Half",
+                                                    "Low Carb",
+                                                    "Plain"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "properties": {
+                                            "amount": {
+                                                "$ref": "#/definitions/ExtraAmount"
+                                            },
+                                            "name": {
+                                                "enum": [
+                                                    "Jalapeños",
+                                                    "Onion Rings"
+                                                ],
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "enum": [
+                                "French Fries",
+                                "Onion Rings",
+                                "Sweet Potato Fries"
+                            ],
+                            "type": "string"
+                        },
+                        "size": {
+                            "const": "Medium",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "const": "Jalapeño Poppers",
+                            "type": "string"
+                        },
+                        "sauce": {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "enum": [
+                                                "BBQ Dipping Sauce",
+                                                "Buffalo Dipping Sauce",
+                                                "Cool Ranch Dipping Sauce",
+                                                "Honey Mustard Dipping Sauce",
+                                                "Nacho Dipping Sauce",
+                                                "None"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "const": "CHOOSE",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "size": {
+                            "const": "6 Piece",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/NAME_4"
+                        },
+                        "options": {
+                            "items": {
+                                "properties": {
+                                    "amount": {
+                                        "enum": [
+                                            "Light",
+                                            "No",
+                                            "Regular"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "const": "Ice",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "size": {
+                            "const": "Medium",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "const": "CHOOSE",
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "properties": {
+        "items": {
+            "items": {
+                "$ref": "#/definitions/Item"
+            },
+            "type": "array"
+        }
+    },
+    "type": "object"
+}
+
