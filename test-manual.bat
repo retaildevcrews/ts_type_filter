@@ -1,0 +1,3 @@
+@echo off
+echo Running manual tests only...
+pytest tests/ -m manual -v
