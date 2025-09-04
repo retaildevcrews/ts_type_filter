@@ -9,6 +9,7 @@ from .filter import (
     collect_string_literals,
     Define,
     Literal,
+    Node,
     Never,
     ParamDef,
     ParamRef,
@@ -20,6 +21,7 @@ from .parser import (
     parse,
 )
 from .validator import (create_validator)
+from .validator2 import (create_validator2)
 
 __all__ = [
     "Any",
@@ -31,12 +33,14 @@ __all__ = [
     "create_normalizer",
     "create_normalizer_spec",
     "create_validator",
+    "create_validator2",
     "merge_normalizer_specs",
     "normalize",
     "Define",
     "Index",
     "Literal",
     "Never",
+    "Node",
     "ParamDef",
     "ParamRef",
     "parse",

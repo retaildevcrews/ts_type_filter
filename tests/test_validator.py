@@ -1,7 +1,7 @@
 import pytest
 
 from gotaglio.shared import read_text_file
-from ts_type_filter import create_validator, parse
+from ts_type_filter import create_validator, create_validator2, parse
 
 
 def generate_test_cases():
@@ -309,13 +309,13 @@ test_params, test_ids = generate_test_cases()
 )
 def test_validator_generated(source, root, input_value, expected, description):
     type_defs = parse(source)
-    validator = create_validator(type_defs, root)
-    try:
+    validator = create_validator2(type_defs, root)
+    # try:
         # validator.model_validate(input_value)
-        x = validator(value=input_value)
-        result = True
-    except Exception as e:
-        result = False
+    result = validator(input_value)
+        # result = True
+    # except Exception as e:
+    #     result = False
     assert result == expected, f"Failed test: {description}"
 
 

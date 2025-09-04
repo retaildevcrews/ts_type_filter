@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from typing import List, Optional
 
 from gotaglio.shared import to_json_string
 
@@ -268,8 +269,35 @@ class Array(Node):
         self.type.visit(subgraph, visitor)
 
 
+class ParamDef(Node):
+    def __init__(self, name, extends=None):
+        self.name = name
+        self.extends = extends
+
+    def format(self):
+        return self.name + (f" extends {self.extends.format()}" if self.extends else "")
+
+    def index(self, symbols, indexer):
+        if self.extends:
+            self.extends.index(symbols, indexer)
+
+    # TODO: do we filter extends logic?
+    def filter(self, subgraph):
+        if self.extends:
+            t = self.extends.filter(subgraph)
+            if isinstance(t, Never):
+                return ParamDef(self.name, Never())
+            return ParamDef(self.name, t)
+        return self
+
+    def visit(self, subgraph, visitor):
+        visitor(self)
+        if self.extends:
+            self.extends.visit(subgraph, visitor)
+
+
 class Define(Node):
-    def __init__(self, name, params, type, hint=None):
+    def __init__(self, name, params: List[ParamDef], type, hint=None):
         self.name = name
         self.params = params
         self.type = type
@@ -352,33 +380,6 @@ class Never(Node):
         pass
 
 
-class ParamDef(Node):
-    def __init__(self, name, extends=None):
-        self.name = name
-        self.extends = extends
-
-    def format(self):
-        return self.name + (f" extends {self.extends.format()}" if self.extends else "")
-
-    def index(self, symbols, indexer):
-        if self.extends:
-            self.extends.index(symbols, indexer)
-
-    # TODO: do we filter extends logic?
-    def filter(self, subgraph):
-        if self.extends:
-            t = self.extends.filter(subgraph)
-            if isinstance(t, Never):
-                return ParamDef(self.name, Never())
-            return ParamDef(self.name, t)
-        return self
-
-    def visit(self, subgraph, visitor):
-        visitor(self)
-        if self.extends:
-            self.extends.visit(subgraph, visitor)
-
-
 class ParamRef(Node):
     def __init__(self, type):
         self.type = type
@@ -433,7 +434,7 @@ class Struct(Node):
 
 
 class Type(Node):
-    def __init__(self, name, params=None):
+    def __init__(self, name, params: Optional[List['Node']] = None):
         self.name = name
         self.params = params
 
