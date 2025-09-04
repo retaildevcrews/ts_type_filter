@@ -21,7 +21,9 @@ def compile_node(
     templates: dict[str, Template],
     locals: dict[str, int],
 ) -> Template:
-    if isinstance(ts_type, TS_Define):
+    if isinstance(ts_type, TS_Array):
+        return compile_array(ts_type, symbols, templates, locals)
+    elif isinstance(ts_type, TS_Define):
         return compile_define(ts_type, symbols, templates, locals)
     elif isinstance(ts_type, TS_Literal):
         return compile_literal(ts_type, symbols, templates, locals)
@@ -29,8 +31,34 @@ def compile_node(
         return compile_struct(ts_type, symbols, templates, locals)
     elif isinstance(ts_type, TS_Type):
         return compile_type_ref(ts_type, symbols, templates, locals)
+    elif isinstance(ts_type, TS_Union):
+        return compile_union(ts_type, symbols, templates, locals)
     else:
         raise ValueError(f"Unsupported TS type: {ts_type}")
+
+
+def compile_array(
+    ts_array: TS_Array,
+    symbols: dict[str, TS_Define],
+    templates: dict[str, Template],
+    locals: dict[str, int],
+) -> Template:
+    element_template = compile_node(ts_array.type, symbols, templates, locals)
+
+    def template(args: List[Validator]) -> Validator:
+        element_validator = element_template(args)
+
+        def validator(value: Any) -> bool:
+            if not isinstance(value, list):
+                return False
+            for item in value:
+                if not element_validator(item):
+                    return False
+            return True
+
+        return validator
+
+    return template
 
 
 def compile_define(
@@ -137,9 +165,10 @@ def compile_type_ref(
             return inner_template(validators)
 
         return template
-    
+
     index = locals.get(ts_type.name)
     if index is not None:
+
         def template(args: List[Validator]) -> Validator:
             if index >= len(args):
                 raise ValueError(f"Type parameter index {index} out of range")
@@ -149,15 +178,7 @@ def compile_type_ref(
 
     elif ts_type.name == "string":
         return primitive_type_template(str)
-        # def template(args: List[Validator]) -> Validator:
-        #     def validator(value: Any) -> bool:
-        #         return isinstance(value, str)
-
-        #     return validator
-
-        # return template
     elif ts_type.name == "number":
-        # return primitive_type_template((int, float))        
         # Special handling to exclude bool
         def template(args: List[Validator]) -> Validator:
             def validator(value: Any) -> bool:
@@ -168,14 +189,6 @@ def compile_type_ref(
         return template
     elif ts_type.name == "boolean":
         return primitive_type_template(bool)
-
-        # def template(args: List[Validator]) -> Validator:
-        #     def validator(value: Any) -> bool:
-        #         return isinstance(value, bool)
-
-        #     return validator
-
-        # return template
     elif ts_type.name == "any":
 
         def template(args: List[Validator]) -> Validator:
@@ -196,6 +209,26 @@ def compile_type_ref(
         return template
     else:
         raise ValueError(f"Unknown type: {ts_type.name}")
+
+
+def compile_union(
+    ts_union: TS_Union,
+    symbols: dict[str, TS_Define],
+    templates: dict[str, Template],
+    locals: dict[str, int],
+) -> Template:
+    templates = [
+        compile_node(option, symbols, templates, locals) for option in ts_union.types]
+
+    def template(args: List[Validator]) -> Validator:
+        validators = [tmpl(args) for tmpl in templates]
+
+        def validator(value: Any) -> bool:
+            return any(v(value) for v in validators)
+
+        return validator
+
+    return template
 
 
 def primitive_type_template(t) -> Template:
