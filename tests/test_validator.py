@@ -1,7 +1,7 @@
 import pytest
 
 from gotaglio.shared import read_text_file
-from ts_type_filter import create_validator, create_validator2, parse
+from ts_type_filter import create_validator2, parse
 
 
 def generate_test_cases():
@@ -324,10 +324,11 @@ def test_validator_generated(source, root, input_value, expected, description):
 def test_menu_validation():
     source = read_text_file('samples/menu/data/menu.ts')
     type_defs = parse(source)
-    validator = create_validator(type_defs, "Cart")
-    validator(value={"items": []})
+    validator = create_validator2(type_defs, "Cart")
+    assert validator({"items": []})
+    assert validator({"items": [{"name": "Cheeseburger"}]})
     # print(source)
-    assert False
+    # assert result
 
 @pytest.mark.manual
 def test_complex_typescript_validation_manual():
@@ -348,7 +349,7 @@ def test_complex_typescript_validation_manual():
     """
     
     type_defs = parse(source)
-    validator = create_validator(type_defs, "UserProfile")
+    validator = create_validator2(type_defs, "UserProfile")
     
     # Test complex valid case
     valid_user = {
@@ -372,7 +373,7 @@ def test_performance_validation_manual():
     # This test might be slow and is only for manual performance analysis
     source = "type BigArray = {items: string[]; metadata: {count: number}}"
     type_defs = parse(source)
-    validator = create_validator(type_defs, "BigArray")
+    validator = create_validator2(type_defs, "BigArray")
     
     # Create a large array for performance testing
     large_data = {
@@ -395,7 +396,7 @@ def test_edge_case_validation_manual():
     # This test covers edge cases that might fail and need manual investigation
     source = "type EdgeCase = {deep: {nested: {value: string | null}}}"
     type_defs = parse(source)
-    validator = create_validator(type_defs, "EdgeCase")
+    validator = create_validator2(type_defs, "EdgeCase")
     
     # Test deeply nested null values
     edge_case_data = {
@@ -442,7 +443,7 @@ def test_comprehensive_type_coverage_manual():
     """
     
     type_defs = parse(source)
-    validator = create_validator(type_defs, "Task")
+    validator = create_validator2(type_defs, "Task")
     
     comprehensive_task = {
         "id": "task-001",

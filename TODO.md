@@ -2,6 +2,7 @@
 
 Top Top Top
 
+* Validator error messages
 * Make Symbols in validator.py threadsafe
 * Rework validator - are custom validators really necessary?
 * Unit test hierarchy for validator
