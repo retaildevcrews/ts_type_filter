@@ -353,7 +353,9 @@ class Literal(Node):
         return to_json_string(self.text)
 
     def index(self, symbols, indexer):
-        indexer.add(self)
+        # Literal can be string, number, or boolean. Only index strings.
+        if isinstance(self.text, str):
+            indexer.add(self)
 
     def filter(self, subgraph):
         return self if subgraph.keep(self) else Never()
