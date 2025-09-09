@@ -222,7 +222,8 @@ def isToken(node, type_name):
 def parse(text):
     parser = get_parser()
     transformer = get_transformer()
-    tree = parser.parse(strip_typescript_comments(text))
+    clean_text = strip_typescript_comments(text)
+    tree = parser.parse(clean_text)
     return transformer.transform(tree)
 
 
