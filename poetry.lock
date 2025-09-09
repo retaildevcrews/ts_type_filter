@@ -533,8 +533,8 @@ tiktoken = "^0.9.0"
 [package.source]
 type = "git"
 url = "https://github.com/MikeHopcroft/gotaglio"
-reference = "turns-rebase"
-resolved_reference = "b8bd1713b72f06262e62b75cee3ce80c236c97a2"
+reference = "HEAD"
+resolved_reference = "2e5480cc2f24e8d93029f155fdc7a592ad57aa82"
 
 [[package]]
 name = "h11"
@@ -2178,4 +2178,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "b6608f0c34388142490f68c62aabdfa22445886e7d2cf6111d7fd68db2618ab1"
+content-hash = "d2aa3bb6ad63752c055733205a56fa1416b3965f3edf8d54289657b135328bec"

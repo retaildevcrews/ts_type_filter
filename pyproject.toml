@@ -21,7 +21,7 @@ python = ">=3.12"
 nltk = "^3.9.1"
 rich = "^13.9.4"
 tiktoken = "^0.9.0"
-gotaglio = {git = "https://github.com/MikeHopcroft/gotaglio", branch = "turns-rebase"}
+gotaglio = {git = "https://github.com/MikeHopcroft/gotaglio"}
 lark = "^1.2.2"
 pydantic = "^2.11.1"
 
